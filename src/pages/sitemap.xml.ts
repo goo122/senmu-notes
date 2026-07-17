@@ -8,9 +8,24 @@ export const GET: APIRoute = async ({ site: siteUrl }) => {
   const tags = await getAllTags();
   const categories = await getCategoryCounts();
 
-  const staticPaths = ['/', '/blog', '/tags', '/about', '/search', '/archive'];
+  const staticPaths = [
+    '/',
+    '/blog',
+    '/tags',
+    '/about',
+    '/search',
+    '/archive',
+    '/friends',
+  ];
+  const pageSize = 3;
+  const totalPages = Math.max(1, Math.ceil(posts.length / pageSize));
+  const blogPages = Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => ({
+    loc: `${base}/blog/page/${i + 2}`,
+  }));
+
   const urls: { loc: string; lastmod?: string }[] = [
     ...staticPaths.map((p) => ({ loc: `${base}${p === '/' ? '' : p}` })),
+    ...blogPages,
     ...posts.map((p) => ({
       loc: `${base}/blog/${p.slug}`,
       lastmod: (p.data.updatedDate ?? p.data.pubDate).toISOString(),

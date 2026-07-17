@@ -3,4 +3,8 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   site: 'https://example.com',
   trailingSlash: 'never',
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
 });

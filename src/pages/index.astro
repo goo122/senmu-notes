@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
+import RecentReading from '../components/RecentReading.astro';
 import { getFeaturedPosts, getPublishedPosts } from '../lib/posts';
 import { site, categoryLabels, type Category } from '../lib/site';
 
@@ -23,6 +24,8 @@ const categories = Object.entries(categoryLabels) as [Category, string][];
         </div>
       </div>
     </section>
+
+    <RecentReading />
 
     <section class="block">
       <div class="block-head">

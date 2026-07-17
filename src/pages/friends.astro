@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { friends, site } from '../lib/site';
+---
+
+<BaseLayout title="友链" description={`友情链接 — ${site.name}`}>
+  <div class="container">
+    <header class="page-header">
+      <h1>友链</h1>
+      <p class="lead">
+        一些常去的角落。想交换友链？发邮件到
+        <a href={`mailto:${site.social.email}`}>{site.social.email}</a>
+        ，在 <code>src/lib/site.ts</code> 的 <code>friends</code> 里维护列表。
+      </p>
+    </header>
+
+    <div class="friend-grid">
+      {
+        friends.map((f) => (
+          <a class="friend-card" href={f.url} target="_blank" rel="noopener noreferrer">
+            <h2>{f.name}</h2>
+            <p>{f.description}</p>
+            <span class="url">{f.url.replace(/^https?:\/\//, '')}</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-header {
+    margin-bottom: var(--space-6);
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 2rem;
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--muted);
+    max-width: 40rem;
+    line-height: 1.65;
+  }
+
+  .lead code {
+    font-size: 0.88em;
+    background: var(--soft);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+
+  .friend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .friend-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: var(--space-5);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .friend-card:hover {
+    color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .friend-card h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--accent);
+  }
+
+  .friend-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .url {
+    font-size: 0.82rem;
+    color: var(--muted);
+    word-break: break-all;
+  }
+</style>

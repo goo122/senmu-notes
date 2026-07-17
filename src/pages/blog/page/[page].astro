@@ -1,19 +1,30 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostCard from '../../components/PostCard.astro';
-import Pagination from '../../components/Pagination.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import Pagination from '../../../components/Pagination.astro';
 import {
   getPublishedPosts,
   getCategoryCounts,
-} from '../../lib/posts';
-import { paginateItems } from '../../lib/pagination';
-import { site, categoryLabels, type Category } from '../../lib/site';
+} from '../../../lib/posts';
+import { getTotalPages, paginateItems, POSTS_PER_PAGE } from '../../../lib/pagination';
+import { site, categoryLabels, type Category } from '../../../lib/site';
 
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  const totalPages = getTotalPages(posts.length, POSTS_PER_PAGE);
+  // page 1 is /blog; only emit 2..N
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => ({
+    params: { page: String(i + 2) },
+  }));
+}
+
+const pageNum = Number(Astro.params.page);
 const allPosts = await getPublishedPosts();
 const { items, page, totalPages, total, prevHref, nextHref } = paginateItems(
   allPosts,
-  1,
+  pageNum,
 );
+
 const counts = await getCategoryCounts();
 const countMap = new Map(counts.map((c) => [c.category, c.count]));
 const categories = (Object.keys(categoryLabels) as Category[]).filter(
@@ -21,13 +32,15 @@ const categories = (Object.keys(categoryLabels) as Category[]).filter(
 );
 ---
 
-<BaseLayout title="文章" description={`全部文章 — ${site.name}`}>
+<BaseLayout
+  title={`文章 · 第 ${page} 页`}
+  description={`全部文章第 ${page} 页 — ${site.name}`}
+>
   <div class="container">
     <header class="page-header">
       <h1>文章</h1>
       <p class="lead">
-        技术、生活与随想，按时间倒序排列。共 {total} 篇
-        {totalPages > 1 && ` · 第 ${page}/${totalPages} 页`}。
+        共 {total} 篇 · 第 {page}/{totalPages} 页
       </p>
     </header>
 
@@ -46,17 +59,9 @@ const categories = (Object.keys(categoryLabels) as Category[]).filter(
       )
     }
 
-    {
-      items.length === 0 ? (
-        <p class="empty-state">暂无文章</p>
-      ) : (
-        <div class="post-list">
-          {items.map((post) => (
-            <PostCard post={post} />
-          ))}
-        </div>
-      )
-    }
+    <div class="post-list">
+      {items.map((post) => <PostCard post={post} />)}
+    </div>
 
     <Pagination
       page={page}
@@ -100,14 +105,12 @@ const categories = (Object.keys(categoryLabels) as Category[]).filter(
     color: var(--muted);
     font-size: 0.9rem;
     font-weight: 600;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
   }
 
   .filter:hover,
   .filter.active {
     color: #9a3412;
     background: var(--soft);
-    border-color: var(--border);
   }
 
   :global(html.dark) .filter:hover,
@@ -118,7 +121,6 @@ const categories = (Object.keys(categoryLabels) as Category[]).filter(
   .filter .n {
     font-weight: 500;
     color: var(--muted);
-    font-variant-numeric: tabular-nums;
   }
 
   .post-list {

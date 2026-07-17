@@ -1,0 +1,23 @@
+---
+interface Props {
+  slug: string;
+  title: string;
+}
+
+const { slug, title } = Astro.props;
+---
+
+<script define:vars={{ slug, title }}>
+  const KEY = 'senmu-recent-reads';
+  const href = `/blog/${slug}`;
+  try {
+    const prev = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const next = [
+      { slug, title, href, at: Date.now() },
+      ...prev.filter((i) => i.slug !== slug),
+    ].slice(0, 12);
+    localStorage.setItem(KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
+</script>

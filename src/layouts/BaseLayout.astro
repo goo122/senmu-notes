@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import BackToTop from '../components/BackToTop.astro';
@@ -13,6 +14,8 @@ interface Props {
   type?: 'website' | 'article';
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   showProgress?: boolean;
+  /** OG image path, absolute URL, or leave empty for default /og/default */
+  ogSlug?: string;
 }
 
 const {
@@ -22,13 +25,16 @@ const {
   type = 'website',
   jsonLd,
   showProgress = false,
+  ogSlug = 'default',
 } = Astro.props;
 
 const pageTitle = title === site.title ? title : `${title} · ${site.name}`;
 const base = Astro.site ?? new URL(site.url);
 const canonical = new URL(Astro.url.pathname, base).toString();
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
-const ogImage = image ? new URL(image, base).toString() : undefined;
+const ogImage = image
+  ? new URL(image, base).toString()
+  : new URL(`/og/${ogSlug}`, base).toString();
 
 const defaultJsonLd = {
   '@context': 'https://schema.org',
@@ -75,6 +81,7 @@ const structured = jsonLd ?? defaultJsonLd;
         } catch (e) {}
       })();
     </script>
+    <ClientRouter />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title={site.name} href="/rss.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -92,11 +99,11 @@ const structured = jsonLd ?? defaultJsonLd;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={site.name} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
-    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    <meta name="twitter:image" content={ogImage} />
     <meta name="generator" content={Astro.generator} />
     <meta name="color-scheme" content="light dark" />
     <script type="application/ld+json" set:html={JSON.stringify(structured)} />

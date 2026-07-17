@@ -1,0 +1,110 @@
+---
+interface Props {
+  page: number;
+  totalPages: number;
+  prevHref: string | null;
+  nextHref: string | null;
+  basePath?: string;
+}
+
+const { page, totalPages, prevHref, nextHref, basePath = '/blog' } = Astro.props;
+
+function hrefFor(n: number) {
+  return n <= 1 ? basePath : `${basePath}/page/${n}`;
+}
+
+const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+---
+
+{
+  totalPages > 1 && (
+    <nav class="pagination" aria-label="分页">
+      {prevHref ? (
+        <a class="page-btn" href={prevHref} rel="prev">
+          ← 上一页
+        </a>
+      ) : (
+        <span class="page-btn disabled">← 上一页</span>
+      )}
+
+      <ol class="page-list">
+        {pages.map((n) => (
+          <li>
+            {n === page ? (
+              <span class="page-num current" aria-current="page">
+                {n}
+              </span>
+            ) : (
+              <a class="page-num" href={hrefFor(n)}>
+                {n}
+              </a>
+            )}
+          </li>
+        ))}
+      </ol>
+
+      {nextHref ? (
+        <a class="page-btn" href={nextHref} rel="next">
+          下一页 →
+        </a>
+      ) : (
+        <span class="page-btn disabled">下一页 →</span>
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border);
+  }
+
+  .page-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .page-btn,
+  .page-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .page-btn:hover,
+  .page-num:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .page-num.current {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .page-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+</style>

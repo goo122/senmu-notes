@@ -26,11 +26,31 @@ export const site = {
   },
 } as const;
 
+/** 友链 — 在此维护展示在 /friends 的站点 */
+export const friends = [
+  {
+    name: 'Astro',
+    url: 'https://astro.build',
+    description: '内容驱动的现代 Web 框架',
+  },
+  {
+    name: 'MDN Web Docs',
+    url: 'https://developer.mozilla.org',
+    description: '前端权威文档',
+  },
+  {
+    name: 'web.dev',
+    url: 'https://web.dev',
+    description: '现代 Web 最佳实践',
+  },
+] as const;
+
 export const nav = [
   { href: '/', label: '首页' },
   { href: '/blog', label: '文章' },
   { href: '/archive', label: '归档' },
   { href: '/tags', label: '标签' },
+  { href: '/friends', label: '友链' },
   { href: '/search', label: '搜索' },
   { href: '/about', label: '关于' },
 ] as const;

@@ -1,0 +1,37 @@
+# Decap CMS — 本地可配合 `npx decap-server` 使用
+local_backend: true
+
+backend:
+  name: git-gateway
+  branch: feature/personal-blog
+
+media_folder: public/uploads
+public_folder: /uploads
+
+collections:
+  - name: posts
+    label: 文章
+    label_singular: 文章
+    folder: src/content/posts
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 摘要, name: description, widget: text }
+      - { label: 发布日期, name: pubDate, widget: datetime }
+      - { label: 更新日期, name: updatedDate, widget: datetime, required: false }
+      - label: 分类
+        name: category
+        widget: select
+        options:
+          - { label: 技术, value: tech }
+          - { label: 生活, value: life }
+          - { label: 随想, value: notes }
+          - { label: 其他, value: other }
+      - { label: 标签, name: tags, widget: list, required: false }
+      - { label: 精选, name: featured, widget: boolean, default: false, required: false }
+      - { label: 草稿, name: draft, widget: boolean, default: false, required: false }
+      - { label: 封面图, name: heroImage, widget: image, required: false }
+      - { label: 正文, name: body, widget: markdown }

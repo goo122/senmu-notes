@@ -1,0 +1,122 @@
+---
+---
+
+<section class="recent-reading" id="recent-reading" hidden>
+  <div class="block-head">
+    <h2 class="section-title">继续阅读</h2>
+    <button type="button" class="clear" id="clear-recent">清除</button>
+  </div>
+  <ul class="recent-list" id="recent-list"></ul>
+</section>
+
+<script>
+  const KEY = 'senmu-recent-reads';
+  const section = document.getElementById('recent-reading');
+  const list = document.getElementById('recent-list');
+  const clearBtn = document.getElementById('clear-recent');
+
+  type Item = { slug: string; title: string; href: string; at: number };
+
+  function load(): Item[] {
+    try {
+      return JSON.parse(localStorage.getItem(KEY) || '[]') as Item[];
+    } catch {
+      return [];
+    }
+  }
+
+  function render() {
+    if (!section || !list) return;
+    const items = load().slice(0, 5);
+    if (items.length === 0) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    list.innerHTML = items
+      .map(
+        (i) => `
+      <li>
+        <a href="${i.href}">${i.title}</a>
+        <time>${new Date(i.at).toLocaleDateString('zh-CN')}</time>
+      </li>`,
+      )
+      .join('');
+  }
+
+  clearBtn?.addEventListener('click', () => {
+    localStorage.removeItem(KEY);
+    render();
+  });
+
+  render();
+</script>
+
+<style>
+  .recent-reading {
+    margin-bottom: var(--space-8);
+  }
+
+  .block-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .block-head .section-title {
+    margin: 0;
+  }
+
+  .clear {
+    border: none;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .clear:hover {
+    color: var(--accent);
+  }
+
+  .recent-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .recent-list :global(li) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .recent-list :global(li:last-child) {
+    border-bottom: none;
+  }
+
+  .recent-list :global(a) {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .recent-list :global(a:hover) {
+    color: var(--accent);
+  }
+
+  .recent-list :global(time) {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>

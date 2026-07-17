@@ -9,6 +9,7 @@ import ShareBar from '../../components/ShareBar.astro';
 import Comments from '../../components/Comments.astro';
 import CodeCopy from '../../components/CodeCopy.astro';
 import ReadingProgress from '../../components/ReadingProgress.astro';
+import TrackReading from '../../components/TrackReading.astro';
 import {
   getNeighborPosts,
   getRelatedPosts,
@@ -48,6 +49,9 @@ const headings =
 
 const base = Astro.site ?? new URL(site.url);
 const articleUrl = new URL(`/blog/${post.slug}`, base).toString();
+const ogImagePath = post.data.heroImage
+  ? post.data.heroImage
+  : `/og/${post.slug}`;
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -66,18 +70,21 @@ const jsonLd = {
   articleSection: post.data.category,
   wordCount: post.body.length,
   timeRequired: `PT${minutes}M`,
+  image: new URL(ogImagePath, base).toString(),
 };
 ---
 
 <BaseLayout
   title={post.data.title}
   description={post.data.description}
-  image={post.data.heroImage}
+  image={ogImagePath}
   type="article"
   jsonLd={jsonLd}
   showProgress
+  ogSlug={post.slug}
 >
   <ReadingProgress slot="progress" />
+  <TrackReading slug={post.slug} title={post.data.title} />
   <article class="container article">
     <header class="article-header">
       <h1>{post.data.title}</h1>
