@@ -61,9 +61,13 @@
   padding: 1rem 1.1rem;
   overflow-x: auto;
   border-radius: var(--radius-card);
-  background: #1c1917;
-  color: #fafaf9;
+  background: var(--code-bg);
+  color: var(--code-fg);
   margin: 0 0 1.25em;
+}
+
+.prose :where(h2, h3) {
+  scroll-margin-top: calc(var(--header-h) + 1rem);
 }
 
 .prose pre code {

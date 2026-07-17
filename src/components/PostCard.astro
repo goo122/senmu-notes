@@ -1,5 +1,7 @@
 ---
 import type { Post } from '../lib/posts';
+import { readingMinutesFor } from '../lib/posts';
+import { formatReadingTime } from '../lib/reading';
 import CategoryBadge from './CategoryBadge.astro';
 import TagPill from './TagPill.astro';
 
@@ -13,6 +15,7 @@ const date = post.data.pubDate.toLocaleDateString('zh-CN', {
   month: 'short',
   day: 'numeric',
 });
+const reading = formatReadingTime(readingMinutesFor(post));
 ---
 
 <article class="post-card">
@@ -20,6 +23,7 @@ const date = post.data.pubDate.toLocaleDateString('zh-CN', {
     <div class="card-meta">
       <CategoryBadge category={post.data.category} />
       <time datetime={post.data.pubDate.toISOString()}>{date}</time>
+      <span class="reading">{reading}</span>
     </div>
     <h3 class="card-title">{post.data.title}</h3>
     <p class="card-desc">{post.data.description}</p>
@@ -61,6 +65,7 @@ const date = post.data.pubDate.toLocaleDateString('zh-CN', {
 
   .card-meta {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
     margin-bottom: 0.5rem;

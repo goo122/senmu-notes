@@ -3,7 +3,9 @@ import { type CollectionEntry, getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostMeta from '../../components/PostMeta.astro';
 import PostNav from '../../components/PostNav.astro';
-import { getNeighborPosts } from '../../lib/posts';
+import TableOfContents from '../../components/TableOfContents.astro';
+import { getNeighborPosts, readingMinutesFor } from '../../lib/posts';
+import { extractHeadings, formatReadingTime } from '../../lib/reading';
 import '../../styles/prose.css';
 
 export async function getStaticPaths() {
@@ -21,14 +23,24 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content, headings: renderedHeadings } = await post.render();
 const { prev, next } = await getNeighborPosts(post.slug);
+const readingTime = formatReadingTime(readingMinutesFor(post));
+
+// Prefer Astro-rendered heading ids; fallback to markdown parse
+const headings =
+  renderedHeadings && renderedHeadings.length > 0
+    ? renderedHeadings
+        .filter((h) => h.depth >= 2 && h.depth <= 3)
+        .map((h) => ({ depth: h.depth, text: h.text, id: h.slug }))
+    : extractHeadings(post.body);
 ---
 
 <BaseLayout
   title={post.data.title}
   description={post.data.description}
   image={post.data.heroImage}
+  type="article"
 >
   <article class="container article">
     <header class="article-header">
@@ -38,8 +50,10 @@ const { prev, next } = await getNeighborPosts(post.slug);
         category={post.data.category}
         tags={post.data.tags}
         updatedDate={post.data.updatedDate}
+        readingTime={readingTime}
       />
     </header>
+    <TableOfContents headings={headings} />
     <div class="prose">
       <Content />
     </div>
@@ -56,7 +70,8 @@ const { prev, next } = await getNeighborPosts(post.slug);
   }
 
   .article :global(.post-meta),
-  .article :global(.post-nav) {
+  .article :global(.post-nav),
+  .article :global(.toc) {
     max-width: var(--content-width);
   }
 </style>

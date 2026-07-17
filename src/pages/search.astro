@@ -1,0 +1,218 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSearchIndex } from '../lib/posts';
+import { site, categoryLabels } from '../lib/site';
+
+const index = await getSearchIndex();
+const payload = JSON.stringify(index);
+---
+
+<BaseLayout title="搜索" description={`搜索文章 — ${site.name}`}>
+  <div class="container search-page">
+    <header class="page-header">
+      <h1>搜索</h1>
+      <p class="lead">按标题、摘要、标签或正文关键词查找。</p>
+    </header>
+
+    <label class="search-box">
+      <span class="sr-only">搜索关键词</span>
+      <input
+        type="search"
+        id="search-input"
+        placeholder="输入关键词，例如：重构、生活…"
+        autocomplete="off"
+        enterkeyhint="search"
+      />
+    </label>
+    <p class="status" id="search-status" aria-live="polite">输入关键词开始搜索</p>
+    <div class="results" id="search-results"></div>
+  </div>
+</BaseLayout>
+
+<script
+  define:vars={{
+    payload,
+    categoryLabels,
+  }}
+>
+  const posts = JSON.parse(payload);
+  const input = document.getElementById('search-input');
+  const results = document.getElementById('search-results');
+  const status = document.getElementById('search-status');
+
+  function highlight(text, q) {
+    if (!q) return text;
+    try {
+      const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return text.replace(re, '<mark>$1</mark>');
+    } catch {
+      return text;
+    }
+  }
+
+  function run() {
+    const q = (input.value || '').trim().toLowerCase();
+    if (!q) {
+      results.innerHTML = '';
+      status.textContent = '输入关键词开始搜索';
+      return;
+    }
+
+    const matched = posts.filter((p) => {
+      const hay = [
+        p.title,
+        p.description,
+        p.category,
+        categoryLabels[p.category] || '',
+        ...(p.tags || []),
+        p.body,
+      ]
+        .join(' ')
+        .toLowerCase();
+      return hay.includes(q);
+    });
+
+    status.textContent =
+      matched.length === 0 ? `没有找到与「${input.value.trim()}」相关的文章` : `找到 ${matched.length} 篇相关文章`;
+
+    results.innerHTML = matched
+      .map((p) => {
+        const date = new Date(p.pubDate).toLocaleDateString('zh-CN');
+        const cat = categoryLabels[p.category] || p.category;
+        return `
+          <article class="result-card">
+            <a href="/blog/${p.slug}">
+              <div class="meta">${cat} · ${date}</div>
+              <h2>${highlight(p.title, input.value.trim())}</h2>
+              <p>${highlight(p.description, input.value.trim())}</p>
+            </a>
+          </article>
+        `;
+      })
+      .join('');
+  }
+
+  input?.addEventListener('input', run);
+  input?.addEventListener('search', run);
+
+  const params = new URLSearchParams(window.location.search);
+  const initial = params.get('q');
+  if (initial) {
+    input.value = initial;
+    run();
+  }
+</script>
+
+<style>
+  .page-header {
+    margin-bottom: var(--space-5);
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 2rem;
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .search-box {
+    display: block;
+    margin-bottom: var(--space-3);
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 0.85rem 1.1rem;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    box-shadow: var(--shadow-soft);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .search-box input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+
+  .status {
+    margin: 0 0 var(--space-5);
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .results {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .results :global(.result-card) {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .results :global(.result-card:hover) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .results :global(.result-card a) {
+    color: inherit;
+    display: block;
+  }
+
+  .results :global(.result-card a:hover) {
+    color: inherit;
+  }
+
+  .results :global(.meta) {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+
+  .results :global(h2) {
+    margin: 0 0 0.4rem;
+    font-size: 1.15rem;
+    color: var(--text);
+  }
+
+  .results :global(.result-card:hover h2) {
+    color: var(--accent);
+  }
+
+  .results :global(p) {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .results :global(mark) {
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 0.15em;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+</style>

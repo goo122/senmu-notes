@@ -73,13 +73,17 @@ img {
 
 .btn-ghost {
   background: var(--soft);
-  color: #9a3412;
+  color: var(--accent-hover);
   border-color: var(--border);
 }
 
 .btn-ghost:hover {
-  color: #9a3412;
+  color: var(--accent);
   box-shadow: var(--shadow-soft);
+}
+
+html.dark .btn-ghost {
+  color: var(--accent);
 }
 
 .section-title {

@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import BackToTop from '../components/BackToTop.astro';
 import { site } from '../lib/site';
 import '../styles/global.css';
 
@@ -8,16 +9,18 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
+  type?: 'website' | 'article';
 }
 
 const {
   title = site.title,
   description = site.description,
   image,
+  type = 'website',
 } = Astro.props;
 
 const pageTitle = title === site.title ? title : `${title} · ${site.name}`;
-const canonical = new URL(Astro.url.pathname, site.url).toString();
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).toString();
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 
@@ -26,7 +29,23 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (function () {
+        try {
+          var key = 'senmu-theme';
+          var stored = localStorage.getItem(key);
+          var dark =
+            stored === 'dark' ||
+            ((stored !== 'light') &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
+          document.documentElement.dataset.theme =
+            stored === 'dark' || stored === 'light' ? stored : 'system';
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={site.name} href="/rss.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -36,12 +55,13 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    {image && <meta property="og:image" content={new URL(image, site.url).toString()} />}
+    {image && <meta property="og:image" content={new URL(image, Astro.site ?? site.url).toString()} />}
     <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="light dark" />
   </head>
   <body class="layout-body">
     <Header currentPath={currentPath} />
@@ -49,6 +69,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
       <slot />
     </main>
     <Footer />
+    <BackToTop />
   </body>
 </html>
 

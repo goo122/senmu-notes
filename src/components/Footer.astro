@@ -7,6 +7,10 @@ const year = new Date().getFullYear();
   <div class="container footer-inner">
     <p>© {year} {site.author} · {site.name}</p>
     <p class="footer-links">
+      <a href="/archive">归档</a>
+      <span aria-hidden="true">·</span>
+      <a href="/rss.xml">RSS</a>
+      <span aria-hidden="true">·</span>
       <a href={site.social.github} rel="noopener noreferrer" target="_blank">GitHub</a>
       <span aria-hidden="true">·</span>
       <a href={`mailto:${site.social.email}`}>邮箱</a>
@@ -33,6 +37,7 @@ const year = new Date().getFullYear();
 
   .footer-links {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     margin: 0;
   }

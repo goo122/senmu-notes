@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPublishedPosts } from '../lib/posts';
+import { site, categoryLabels } from '../lib/site';
+
+const posts = await getPublishedPosts();
+const byYear = new Map<number, typeof posts>();
+
+for (const post of posts) {
+  const year = post.data.pubDate.getFullYear();
+  const list = byYear.get(year) ?? [];
+  list.push(post);
+  byYear.set(year, list);
+}
+
+const years = [...byYear.keys()].sort((a, b) => b - a);
+---
+
+<BaseLayout title="归档" description={`文章归档 — ${site.name}`}>
+  <div class="container">
+    <header class="page-header">
+      <h1>归档</h1>
+      <p class="lead">按年份浏览全部 {posts.length} 篇文章。</p>
+    </header>
+
+    {
+      years.map((year) => (
+        <section class="year-block">
+          <h2>{year}</h2>
+          <ul class="year-list">
+            {(byYear.get(year) ?? []).map((post) => (
+              <li>
+                <time datetime={post.data.pubDate.toISOString()}>
+                  {post.data.pubDate.toLocaleDateString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                  })}
+                </time>
+                <span class="cat">{categoryLabels[post.data.category]}</span>
+                <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .page-header {
+    margin-bottom: var(--space-6);
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 2rem;
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .year-block {
+    margin-bottom: var(--space-6);
+  }
+
+  .year-block h2 {
+    margin: 0 0 var(--space-3);
+    font-size: 1.25rem;
+    color: var(--accent);
+  }
+
+  .year-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .year-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 0.85rem;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .year-list li:last-child {
+    border-bottom: none;
+  }
+
+  time {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    min-width: 3.2rem;
+  }
+
+  .cat {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 2.5rem;
+  }
+
+  a {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  a:hover {
+    color: var(--accent);
+  }
+</style>

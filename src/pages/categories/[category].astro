@@ -1,41 +1,41 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
-import {
-  getPublishedPosts,
-  getCategoryCounts,
-} from '../../lib/posts';
+import { getPostsByCategory, getCategoryCounts } from '../../lib/posts';
 import { site, categoryLabels, type Category } from '../../lib/site';
 
-const posts = await getPublishedPosts();
-const counts = await getCategoryCounts();
-const countMap = new Map(counts.map((c) => [c.category, c.count]));
-const categories = (Object.keys(categoryLabels) as Category[]).filter(
-  (c) => (countMap.get(c) ?? 0) > 0,
-);
+export async function getStaticPaths() {
+  const counts = await getCategoryCounts();
+  return counts.map(({ category }) => ({
+    params: { category },
+  }));
+}
+
+const { category } = Astro.params;
+const cat = category as Category;
+const label = categoryLabels[cat] ?? cat;
+const posts = await getPostsByCategory(cat);
+const available = (await getCategoryCounts()).map((c) => c.category);
 ---
 
-<BaseLayout title="文章" description={`全部文章 — ${site.name}`}>
+<BaseLayout title={`${label} · 分类`} description={`${label}分类下的文章 — ${site.name}`}>
   <div class="container">
     <header class="page-header">
-      <h1>文章</h1>
-      <p class="lead">技术、生活与随想，按时间倒序排列。共 {posts.length} 篇。</p>
+      <p class="eyebrow"><a href="/blog">← 全部文章</a></p>
+      <h1>{label}</h1>
+      <p class="lead">{posts.length} 篇文章</p>
     </header>
 
-    {
-      categories.length > 0 && (
-        <div class="filters" role="navigation" aria-label="按分类筛选">
-          <a class="filter active" href="/blog">
-            全部 <span class="n">{posts.length}</span>
+    <div class="filters" role="navigation" aria-label="分类">
+      <a class="filter" href="/blog">全部</a>
+      {
+        available.map((c) => (
+          <a class:list={['filter', { active: c === cat }]} href={`/categories/${c}`}>
+            {categoryLabels[c]}
           </a>
-          {categories.map((cat) => (
-            <a class="filter" href={`/categories/${cat}`}>
-              {categoryLabels[cat]} <span class="n">{countMap.get(cat)}</span>
-            </a>
-          ))}
-        </div>
-      )
-    }
+        ))
+      }
+    </div>
 
     {
       posts.length === 0 ? (
@@ -54,6 +54,11 @@ const categories = (Object.keys(categoryLabels) as Category[]).filter(
 <style>
   .page-header {
     margin-bottom: var(--space-5);
+  }
+
+  .eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
   }
 
   .page-header h1 {
@@ -75,8 +80,6 @@ const categories = (Object.keys(categoryLabels) as Category[]).filter(
 
   .filter {
     display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
     padding: 0.4rem 0.85rem;
     border-radius: var(--radius-pill);
     border: 1px solid var(--border);
@@ -84,25 +87,17 @@ const categories = (Object.keys(categoryLabels) as Category[]).filter(
     color: var(--muted);
     font-size: 0.9rem;
     font-weight: 600;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
   }
 
   .filter:hover,
   .filter.active {
     color: #9a3412;
     background: var(--soft);
-    border-color: var(--border);
   }
 
   :global(html.dark) .filter:hover,
   :global(html.dark) .filter.active {
     color: var(--accent);
-  }
-
-  .filter .n {
-    font-weight: 500;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
   }
 
   .post-list {

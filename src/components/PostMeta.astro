@@ -8,9 +8,10 @@ interface Props {
   category: Category;
   tags: string[];
   updatedDate?: Date;
+  readingTime?: string;
 }
 
-const { pubDate, category, tags, updatedDate } = Astro.props;
+const { pubDate, category, tags, updatedDate, readingTime } = Astro.props;
 const published = pubDate.toLocaleDateString('zh-CN', {
   year: 'numeric',
   month: 'long',
@@ -22,6 +23,7 @@ const published = pubDate.toLocaleDateString('zh-CN', {
   <div class="row">
     <CategoryBadge category={category} />
     <time datetime={pubDate.toISOString()}>{published}</time>
+    {readingTime && <span>{readingTime}</span>}
     {
       updatedDate && (
         <span class="updated">

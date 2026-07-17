@@ -18,6 +18,7 @@ const categories = Object.entries(categoryLabels) as [Category, string][];
         <p class="tagline">{site.description}</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="/blog">阅读文章</a>
+          <a class="btn btn-ghost" href="/search">搜索</a>
           <a class="btn btn-ghost" href="/about">关于我</a>
         </div>
       </div>
@@ -38,7 +39,7 @@ const categories = Object.entries(categoryLabels) as [Category, string][];
       <div class="cat-grid">
         {
           categories.map(([key, label]) => (
-            <a class="cat-card" href="/blog">
+            <a class="cat-card" href={`/categories/${key}`}>
               <span class="cat-name">{label}</span>
               <span class="cat-key">{key}</span>
             </a>
