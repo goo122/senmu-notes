@@ -48,28 +48,49 @@ function isActive(href: string, path: string) {
   </div>
 </header>
 
-<script>
-  const toggle = document.getElementById('menu-toggle');
-  const nav = document.getElementById('site-nav');
-  const header = document.querySelector('.site-header');
+<script is:inline>
+  (function () {
+    if (window.__senmuMenuBound) return;
+    window.__senmuMenuBound = true;
 
-  function setOpen(open: boolean) {
-    header?.classList.toggle('nav-open', open);
-    toggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle?.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
-  }
+    function headerEl() {
+      return document.querySelector('.site-header');
+    }
+    function toggleEl() {
+      return document.getElementById('menu-toggle');
+    }
 
-  toggle?.addEventListener('click', () => {
-    setOpen(!header?.classList.contains('nav-open'));
-  });
+    function setOpen(open) {
+      var header = headerEl();
+      var toggle = toggleEl();
+      if (header) header.classList.toggle('nav-open', open);
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        toggle.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+      }
+    }
 
-  nav?.querySelectorAll('a').forEach((a) => {
-    a.addEventListener('click', () => setOpen(false));
-  });
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest('#menu-toggle')) {
+        var header = headerEl();
+        setOpen(!(header && header.classList.contains('nav-open')));
+        return;
+      }
+      if (t.closest('#site-nav a')) {
+        setOpen(false);
+      }
+    });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') setOpen(false);
-  });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') setOpen(false);
+    });
+
+    document.addEventListener('astro:page-load', function () {
+      setOpen(false);
+    });
+  })();
 </script>
 
 <style>

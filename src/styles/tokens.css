@@ -27,6 +27,7 @@
   --code-fg: #fafaf9;
 }
 
+/* 仅由 html.dark 控制暗色，避免与手动切换冲突 */
 html.dark {
   --bg: #0c0a09;
   --surface: #1c1917;
@@ -43,8 +44,9 @@ html.dark {
   --code-fg: #f5f5f4;
 }
 
+/* 无 JS 时跟随系统；有 data-theme 后以脚本 class 为准 */
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme='light']) {
+  html:not([data-theme]) {
     --bg: #0c0a09;
     --surface: #1c1917;
     --text: #fafaf9;
