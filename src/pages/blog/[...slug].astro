@@ -1,0 +1,62 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostMeta from '../../components/PostMeta.astro';
+import PostNav from '../../components/PostNav.astro';
+import { getNeighborPosts } from '../../lib/posts';
+import '../../styles/prose.css';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => {
+    return import.meta.env.PROD ? data.draft !== true : true;
+  });
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+const { prev, next } = await getNeighborPosts(post.slug);
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  image={post.data.heroImage}
+>
+  <article class="container article">
+    <header class="article-header">
+      <h1>{post.data.title}</h1>
+      <PostMeta
+        pubDate={post.data.pubDate}
+        category={post.data.category}
+        tags={post.data.tags}
+        updatedDate={post.data.updatedDate}
+      />
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+    <PostNav prev={prev} next={next} />
+  </article>
+</BaseLayout>
+
+<style>
+  .article-header h1 {
+    margin: 0 0 var(--space-4);
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    line-height: 1.25;
+    max-width: var(--content-width);
+  }
+
+  .article :global(.post-meta),
+  .article :global(.post-nav) {
+    max-width: var(--content-width);
+  }
+</style>

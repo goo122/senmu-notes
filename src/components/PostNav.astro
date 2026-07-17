@@ -1,0 +1,92 @@
+---
+import type { Post } from '../lib/posts';
+
+interface Props {
+  prev: Post | null;
+  next: Post | null;
+}
+
+const { prev, next } = Astro.props;
+---
+
+{
+  (prev || next) && (
+    <nav class="post-nav" aria-label="相邻文章">
+      {prev ? (
+        <a class="nav-item" href={`/blog/${prev.slug}`}>
+          <span class="label">较新</span>
+          <span class="title">{prev.data.title}</span>
+        </a>
+      ) : (
+        <span class="nav-item empty" />
+      )}
+      {next ? (
+        <a class="nav-item next" href={`/blog/${next.slug}`}>
+          <span class="label">更早</span>
+          <span class="title">{next.data.title}</span>
+        </a>
+      ) : (
+        <span class="nav-item empty" />
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: var(--space-4);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .nav-item:hover {
+    color: var(--text);
+    box-shadow: var(--shadow-soft);
+    transform: translateY(-1px);
+  }
+
+  .nav-item.next {
+    text-align: right;
+  }
+
+  .nav-item.empty {
+    border: none;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .label {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .title {
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  @media (max-width: 560px) {
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .nav-item.next {
+      text-align: left;
+    }
+  }
+</style>

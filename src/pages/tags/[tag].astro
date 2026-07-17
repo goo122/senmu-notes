@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getAllTags, getPostsByTag } from '../../lib/posts';
+import { site } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const tags = await getAllTags();
+  return tags.map(({ tag }) => ({
+    params: { tag },
+  }));
+}
+
+const { tag } = Astro.params;
+const decoded = decodeURIComponent(tag!);
+const posts = await getPostsByTag(decoded);
+---
+
+<BaseLayout title={`#${decoded}`} description={`标签 ${decoded} 下的文章 — ${site.name}`}>
+  <div class="container">
+    <header class="page-header">
+      <p class="eyebrow"><a href="/tags">← 全部标签</a></p>
+      <h1>#{decoded}</h1>
+      <p class="lead">{posts.length} 篇文章</p>
+    </header>
+    {
+      posts.length === 0 ? (
+        <p class="empty-state">暂无文章</p>
+      ) : (
+        <div class="post-list">
+          {posts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .page-header {
+    margin-bottom: var(--space-6);
+  }
+
+  .eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 2rem;
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .post-list {
+    display: grid;
+    gap: var(--space-4);
+  }
+</style>

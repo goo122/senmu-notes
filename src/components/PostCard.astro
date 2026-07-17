@@ -1,0 +1,95 @@
+---
+import type { Post } from '../lib/posts';
+import CategoryBadge from './CategoryBadge.astro';
+import TagPill from './TagPill.astro';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const date = post.data.pubDate.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<article class="post-card">
+  <a class="card-link" href={`/blog/${post.slug}`}>
+    <div class="card-meta">
+      <CategoryBadge category={post.data.category} />
+      <time datetime={post.data.pubDate.toISOString()}>{date}</time>
+    </div>
+    <h3 class="card-title">{post.data.title}</h3>
+    <p class="card-desc">{post.data.description}</p>
+  </a>
+  {
+    post.data.tags.length > 0 && (
+      <div class="card-tags">
+        {post.data.tags.slice(0, 4).map((tag) => (
+          <TagPill tag={tag} />
+        ))}
+      </div>
+    )
+  }
+</article>
+
+<style>
+  .post-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .card-link {
+    color: inherit;
+    display: block;
+  }
+
+  .card-link:hover {
+    color: inherit;
+  }
+
+  .card-meta {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .card-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.15rem;
+    line-height: 1.35;
+    color: var(--text);
+  }
+
+  .card-link:hover .card-title {
+    color: var(--accent);
+  }
+
+  .card-desc {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: var(--space-4);
+  }
+</style>

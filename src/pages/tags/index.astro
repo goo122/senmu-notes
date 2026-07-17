@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagPill from '../../components/TagPill.astro';
+import { getAllTags } from '../../lib/posts';
+import { site } from '../../lib/site';
+
+const tags = await getAllTags();
+---
+
+<BaseLayout title="标签" description={`全部标签 — ${site.name}`}>
+  <div class="container">
+    <header class="page-header">
+      <h1>标签</h1>
+      <p class="lead">按主题浏览文章。</p>
+    </header>
+    {
+      tags.length === 0 ? (
+        <p class="empty-state">暂无标签</p>
+      ) : (
+        <div class="tag-cloud">
+          {tags.map(({ tag, count }) => (
+            <TagPill tag={tag} count={count} />
+          ))}
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .page-header {
+    margin-bottom: var(--space-6);
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 2rem;
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+</style>

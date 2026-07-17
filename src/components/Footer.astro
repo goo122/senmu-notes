@@ -1,0 +1,51 @@
+---
+import { site } from '../lib/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p>© {year} {site.author} · {site.name}</p>
+    <p class="footer-links">
+      <a href={site.social.github} rel="noopener noreferrer" target="_blank">GitHub</a>
+      <span aria-hidden="true">·</span>
+      <a href={`mailto:${site.social.email}`}>邮箱</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    padding: var(--space-6) 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .footer-links a {
+    color: var(--muted);
+  }
+
+  .footer-links a:hover {
+    color: var(--accent);
+  }
+
+  p {
+    margin: 0;
+  }
+</style>

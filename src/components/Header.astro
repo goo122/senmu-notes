@@ -1,0 +1,83 @@
+---
+import { site, nav } from '../lib/site';
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '/' } = Astro.props;
+
+function isActive(href: string, path: string) {
+  if (href === '/') return path === '/' || path === '';
+  return path === href || path.startsWith(href + '/');
+}
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="/">{site.name}</a>
+    <nav class="nav" aria-label="主导航">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={['nav-link', { active: isActive(item.href, currentPath) }]}
+            aria-current={isActive(item.href, currentPath) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: var(--header-h);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .logo {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .logo:hover {
+    color: var(--accent);
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .nav-link {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.25rem 0.35rem;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--accent);
+  }
+</style>

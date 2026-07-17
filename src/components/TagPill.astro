@@ -1,0 +1,41 @@
+---
+interface Props {
+  tag: string;
+  count?: number;
+}
+
+const { tag, count } = Astro.props;
+const href = `/tags/${encodeURIComponent(tag)}`;
+---
+
+<a class="tag-pill" href={href}>
+  <span>#{tag}</span>
+  {typeof count === 'number' && <span class="count">{count}</span>}
+</a>
+
+<style>
+  .tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-pill);
+    background: var(--soft);
+    color: #9a3412;
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .tag-pill:hover {
+    color: #9a3412;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .count {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

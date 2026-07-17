@@ -1,14 +1,210 @@
 ---
-const title = '森木笔记';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { getFeaturedPosts, getPublishedPosts } from '../lib/posts';
+import { site, categoryLabels, type Category } from '../lib/site';
+
+const featured = await getFeaturedPosts(3);
+const latest = (await getPublishedPosts()).slice(0, 4);
+const categories = Object.entries(categoryLabels) as [Category, string][];
 ---
-<html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-  </head>
-  <body>
-    <h1>{title}</h1>
-    <p>脚手架就绪</p>
-  </body>
-</html>
+
+<BaseLayout>
+  <div class="container">
+    <section class="hero">
+      <img class="avatar" src="/avatar.svg" alt={`${site.author} 的头像`} width="88" height="88" />
+      <div class="hero-copy">
+        <h1>你好，我是{site.author} 👋</h1>
+        <p class="tagline">{site.description}</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/blog">阅读文章</a>
+          <a class="btn btn-ghost" href="/about">关于我</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head">
+        <h2 class="section-title">精选文章</h2>
+        <a class="more" href="/blog">全部文章 →</a>
+      </div>
+      <div class="post-list">
+        {featured.map((post) => <PostCard post={post} />)}
+      </div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-title">逛逛分类</h2>
+      <div class="cat-grid">
+        {
+          categories.map(([key, label]) => (
+            <a class="cat-card" href="/blog">
+              <span class="cat-name">{label}</span>
+              <span class="cat-key">{key}</span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    {
+      latest.length > 0 && (
+        <section class="block">
+          <h2 class="section-title">最新更新</h2>
+          <ul class="latest-list">
+            {latest.map((post) => (
+              <li>
+                <time datetime={post.data.pubDate.toISOString()}>
+                  {post.data.pubDate.toLocaleDateString('zh-CN')}
+                </time>
+                <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: flex;
+    gap: var(--space-5);
+    align-items: center;
+    padding: var(--space-6) 0 var(--space-8);
+  }
+
+  .avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(234, 88, 12, 0.22);
+    flex-shrink: 0;
+  }
+
+  .hero-copy h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.6rem, 3.5vw, 2rem);
+  }
+
+  .tagline {
+    margin: 0 0 var(--space-4);
+    color: var(--muted);
+    max-width: 36rem;
+    line-height: 1.65;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .block {
+    margin-bottom: var(--space-8);
+  }
+
+  .block-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .block-head .section-title {
+    margin: 0;
+  }
+
+  .more {
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .post-list {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .cat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: var(--space-4);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .cat-card:hover {
+    color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .cat-name {
+    font-weight: 700;
+  }
+
+  .cat-key {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .latest-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .latest-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    padding: 0.9rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .latest-list li:last-child {
+    border-bottom: none;
+  }
+
+  .latest-list time {
+    color: var(--muted);
+    font-size: 0.9rem;
+    min-width: 6.5rem;
+  }
+
+  .latest-list a {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .latest-list a:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 560px) {
+    .hero {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

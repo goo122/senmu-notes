@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../lib/site';
+---
+
+<BaseLayout title="关于我" description={`关于 ${site.author} — ${site.name}`}>
+  <div class="container about">
+    <header class="page-header">
+      <img class="avatar" src="/avatar.svg" alt="" width="96" height="96" />
+      <div>
+        <h1>关于 {site.author}</h1>
+        <p class="lead">技术与生活交叠的记录者。</p>
+      </div>
+    </header>
+
+    <div class="prose-lite">
+      <p>
+        你好，我是{site.author}。这里是我的数字小花园：会写一点工程笔记，也会留下日常与随想。
+        站点名「{site.name}」取温暖、生长之意——内容慢慢长，不必赶工期。
+      </p>
+      <p>目前主要关注：</p>
+      <ul>
+        <li>前端工程与可读代码</li>
+        <li>生活里的小确幸与节奏</li>
+        <li>阅读与笔记方法</li>
+      </ul>
+      <p>
+        想聊聊？欢迎通过
+        <a href={site.social.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+        或
+        <a href={`mailto:${site.social.email}`}>邮箱</a>
+        找到我。站点配置集中在 <code>src/lib/site.ts</code>，换成你的信息即可。
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about {
+    max-width: var(--content-width);
+  }
+
+  .page-header {
+    display: flex;
+    gap: var(--space-5);
+    align-items: center;
+    margin-bottom: var(--space-6);
+  }
+
+  .avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(234, 88, 12, 0.2);
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 2rem;
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .prose-lite {
+    line-height: 1.75;
+    color: var(--text);
+  }
+
+  .prose-lite p {
+    margin: 0 0 1.1em;
+  }
+
+  .prose-lite ul {
+    margin: 0 0 1.1em;
+    padding-left: 1.25em;
+  }
+
+  .prose-lite code {
+    font-size: 0.9em;
+    background: var(--soft);
+    padding: 0.1em 0.35em;
+    border-radius: 6px;
+  }
+
+  @media (max-width: 560px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
