@@ -37,8 +37,9 @@ import { site } from '../lib/site';
         <li>回到站点「文章」列表刷新即可看到（草稿仅在开发环境可见）</li>
       </ol>
       <p class="note">
-        后台地址是 <code>http://127.0.0.1:4321/admin</code>（注意：不要加末尾 <code>/</code>；端口以终端为准）。
-        两个进程都要保持运行：博客 dev + CMS 本地后端。
+        终端里会打印实际地址。若 4321 被占用，可能是
+        <code>http://127.0.0.1:4330/admin</code>。
+        务必用 <strong>终端显示的端口</strong>，并保持 <code>npm run write</code> 不要关。
       </p>
     </section>
 

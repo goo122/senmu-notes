@@ -1,123 +1,50 @@
-# ═══════════════════════════════════════════
-# 森木笔记 · 网页发文后台（Decap CMS）
-# ═══════════════════════════════════════════
-#
-# 【本机使用】保持 local_backend: true
-#   1. npm run write
-#   2. 打开 http://127.0.0.1:4321/admin  （不要末尾 /）
-#
-# 【部署后公网使用】改成 GitHub 后端：
-#   1. 把下面 local_backend 改为 false 或删掉
-#   2. 取消注释 github backend，填你的仓库
-#   3. 在 GitHub 创建 OAuth App 或使用 Netlify Identity
-# ═══════════════════════════════════════════
-
+# 本地发文：npm run write 后打开 http://127.0.0.1:端口/admin
 local_backend: true
 
 backend:
   name: git-gateway
   branch: feature/personal-blog
-  # --- 上线后改用 GitHub（示例）---
-  # name: github
-  # repo: 你的用户名/仓库名
-  # branch: main
-
-locale: zh_Hans
 
 media_folder: public/uploads
 public_folder: /uploads
 
-slug:
-  encoding: unicode
-  clean_accents: false
-  sanitize_replacement: "-"
-
 collections:
   - name: posts
-    label: 文章
-    label_singular: 文章
-    description: 发布、编辑、存草稿都会写入 src/content/posts/
+    label: Posts
+    label_singular: Post
     folder: src/content/posts
     create: true
     delete: true
     slug: "{{slug}}"
     extension: md
     format: frontmatter
-    sortable_fields: ["pubDate", "title", "category"]
-    view_filters:
-      - label: 仅草稿
-        field: draft
-        pattern: true
-      - label: 已发布
-        field: draft
-        pattern: false
-    view_groups:
-      - label: 按分类
-        field: category
     fields:
-      - label: 标题
-        name: title
-        widget: string
-        hint: 文章主标题（保存时文件名会据此生成，建议标题里带一点英文或稍后改文件名）
-
-      - label: 摘要
-        name: description
-        widget: text
-        hint: 列表页与搜索引擎展示的简介
-
-      - label: 发布日期
+      - { label: Title, name: title, widget: string }
+      - { label: Description, name: description, widget: text }
+      - label: Publish Date
         name: pubDate
         widget: datetime
         date_format: YYYY-MM-DD
         time_format: false
         format: YYYY-MM-DD
-        default: "{{now}}"
-
-      - label: 更新日期
+      - label: Updated Date
         name: updatedDate
         widget: datetime
         date_format: YYYY-MM-DD
         time_format: false
         format: YYYY-MM-DD
         required: false
-
-      - label: 分类
+      - label: Category
         name: category
         widget: select
         options:
-          - { label: 技术, value: tech }
-          - { label: 生活, value: life }
-          - { label: 随想, value: notes }
-          - { label: 其他, value: other }
+          - { label: tech, value: tech }
+          - { label: life, value: life }
+          - { label: notes, value: notes }
+          - { label: other, value: other }
         default: notes
-
-      - label: 标签
-        name: tags
-        widget: list
-        required: false
-        allow_add: true
-        hint: 回车添加多个标签，如：前端、日常
-
-      - label: 首页精选
-        name: featured
-        widget: boolean
-        default: false
-        required: false
-
-      - label: 草稿（不公开）
-        name: draft
-        widget: boolean
-        default: false
-        required: false
-        hint: 勾选后生产环境构建不会展示此文
-
-      - label: 封面图
-        name: heroImage
-        widget: image
-        required: false
-        choose_url: true
-
-      - label: 正文
-        name: body
-        widget: markdown
-        hint: 支持标题、列表、代码块、引用等 Markdown
+      - { label: Tags, name: tags, widget: list, required: false }
+      - { label: Featured, name: featured, widget: boolean, default: false, required: false }
+      - { label: Draft, name: draft, widget: boolean, default: false, required: false }
+      - { label: Hero Image, name: heroImage, widget: image, required: false }
+      - { label: Body, name: body, widget: markdown }
