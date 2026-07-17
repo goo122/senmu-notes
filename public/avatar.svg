@@ -1,11 +1,80 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" role="img" aria-label="森林">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FDBA74"/>
-      <stop offset="1" stop-color="#EA580C"/>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFEDD5"/>
+      <stop offset="45%" stop-color="#FDBA74"/>
+      <stop offset="100%" stop-color="#FED7AA"/>
     </linearGradient>
+    <linearGradient id="sun" x1="160" y1="48" x2="200" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF7ED"/>
+      <stop offset="1" stop-color="#FDBA74"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="200" x2="0" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4D7C0F"/>
+      <stop offset="1" stop-color="#365314"/>
+    </linearGradient>
+    <linearGradient id="treeDark" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#166534"/>
+      <stop offset="1" stop-color="#14532D"/>
+    </linearGradient>
+    <linearGradient id="treeMid" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#22C55E"/>
+      <stop offset="1" stop-color="#15803D"/>
+    </linearGradient>
+    <linearGradient id="treeLight" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#4ADE80"/>
+      <stop offset="1" stop-color="#16A34A"/>
+    </linearGradient>
+    <clipPath id="circle">
+      <circle cx="128" cy="128" r="128"/>
+    </clipPath>
   </defs>
-  <circle cx="64" cy="64" r="64" fill="url(#g)"/>
-  <circle cx="64" cy="52" r="22" fill="#FFFDF9" fill-opacity="0.9"/>
-  <ellipse cx="64" cy="98" rx="34" ry="24" fill="#FFFDF9" fill-opacity="0.9"/>
+
+  <g clip-path="url(#circle)">
+    <!-- sky -->
+    <rect width="256" height="256" fill="url(#sky)"/>
+    <!-- sun -->
+    <circle cx="176" cy="72" r="28" fill="url(#sun)" opacity="0.95"/>
+    <circle cx="176" cy="72" r="40" fill="#FDBA74" opacity="0.25"/>
+
+    <!-- distant hills -->
+    <ellipse cx="64" cy="168" rx="90" ry="36" fill="#86EFAC" opacity="0.55"/>
+    <ellipse cx="200" cy="172" rx="100" ry="40" fill="#4ADE80" opacity="0.4"/>
+
+    <!-- far trees -->
+    <g opacity="0.75">
+      <path d="M28 190 L40 140 L52 190 Z" fill="#166534"/>
+      <path d="M48 195 L62 138 L76 195 Z" fill="#15803D"/>
+      <path d="M72 192 L84 148 L96 192 Z" fill="#166534"/>
+      <path d="M168 194 L182 142 L196 194 Z" fill="#15803D"/>
+      <path d="M190 196 L206 136 L222 196 Z" fill="#166534"/>
+      <path d="M214 198 L226 150 L238 198 Z" fill="#15803D"/>
+    </g>
+
+    <!-- mid trees -->
+    <rect x="54" y="178" width="10" height="36" rx="2" fill="#78350F"/>
+    <path d="M28 188 L59 110 L90 188 Z" fill="url(#treeDark)"/>
+    <path d="M36 168 L59 100 L82 168 Z" fill="url(#treeMid)"/>
+
+    <rect x="118" y="170" width="12" height="42" rx="2" fill="#78350F"/>
+    <path d="M86 186 L124 88 L162 186 Z" fill="url(#treeDark)"/>
+    <path d="M96 164 L124 78 L152 164 Z" fill="url(#treeMid)"/>
+    <path d="M106 146 L124 92 L142 146 Z" fill="url(#treeLight)"/>
+
+    <rect x="178" y="176" width="11" height="40" rx="2" fill="#78350F"/>
+    <path d="M148 190 L183.5 100 L219 190 Z" fill="url(#treeDark)"/>
+    <path d="M158 170 L183.5 92 L209 170 Z" fill="url(#treeMid)"/>
+    <path d="M166 152 L183.5 104 L201 152 Z" fill="url(#treeLight)"/>
+
+    <!-- ground -->
+    <path d="M0 200 C40 188 80 210 128 198 C176 186 210 208 256 196 L256 256 L0 256 Z" fill="url(#ground)"/>
+    <ellipse cx="70" cy="214" rx="22" ry="8" fill="#65A30D" opacity="0.55"/>
+    <ellipse cx="160" cy="220" rx="28" ry="9" fill="#65A30D" opacity="0.45"/>
+    <ellipse cx="210" cy="212" rx="18" ry="7" fill="#84CC16" opacity="0.35"/>
+
+    <!-- soft light rays -->
+    <path d="M176 72 L40 220" stroke="#FFF7ED" stroke-width="18" opacity="0.08"/>
+    <path d="M176 72 L100 230" stroke="#FFF7ED" stroke-width="14" opacity="0.1"/>
+    <path d="M176 72 L150 236" stroke="#FFF7ED" stroke-width="12" opacity="0.08"/>
+  </g>
 </svg>
