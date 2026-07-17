@@ -4,9 +4,9 @@ export const site = {
   description: '写技术、记生活、留一些偶尔闪光的念头。',
   author: '小木',
   lang: 'zh-CN',
-  url: 'https://example.com',
+  url: 'https://senmu-notes.vercel.app',
   social: {
-    github: 'https://github.com/',
+    github: 'https://github.com/goo122/senmu-notes',
     email: 'hello@example.com',
   },
   /**
