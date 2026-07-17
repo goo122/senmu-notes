@@ -47,6 +47,8 @@ const headings =
         .map((h) => ({ depth: h.depth, text: h.text, id: h.slug }))
     : extractHeadings(post.body);
 
+const hasToc = headings.length >= 2;
+
 const base = Astro.site ?? new URL(site.url);
 const articleUrl = new URL(`/blog/${post.slug}`, base).toString();
 const ogImagePath = post.data.heroImage
@@ -85,7 +87,7 @@ const jsonLd = {
 >
   <ReadingProgress slot="progress" />
   <TrackReading slug={post.slug} title={post.data.title} />
-  <article class="container article">
+  <article class:list={['container', 'article', { 'has-toc': hasToc }]}>
     <header class="article-header">
       <h1>{post.data.title}</h1>
       <PostMeta
@@ -97,18 +99,39 @@ const jsonLd = {
       />
       <ShareBar title={post.data.title} />
     </header>
-    <TableOfContents headings={headings} />
-    <div class="prose">
-      <Content />
+
+    <div class="article-layout">
+      {
+        hasToc && (
+          <aside class="toc-col" aria-label="文章目录">
+            <TableOfContents headings={headings} variant="sidebar" />
+          </aside>
+        )
+      }
+
+      <div class="article-main">
+        <div class="prose">
+          <Content />
+        </div>
+        <CodeCopy />
+        <PostNav prev={prev} next={next} />
+        <RelatedPosts posts={related} />
+        <Comments />
+      </div>
     </div>
-    <CodeCopy />
-    <PostNav prev={prev} next={next} />
-    <RelatedPosts posts={related} />
-    <Comments />
   </article>
 </BaseLayout>
 
 <style>
+  .article.has-toc.container {
+    width: min(100% - 2rem, 1100px);
+    max-width: 1100px;
+  }
+
+  .article-header {
+    margin-bottom: var(--space-5);
+  }
+
   .article-header h1 {
     margin: 0 0 var(--space-4);
     font-size: clamp(1.75rem, 4vw, 2.25rem);
@@ -116,12 +139,67 @@ const jsonLd = {
     max-width: var(--content-width);
   }
 
-  .article :global(.post-meta),
-  .article :global(.post-nav),
-  .article :global(.toc),
-  .article :global(.share-bar),
-  .article :global(.related),
-  .article :global(.comments) {
+  .article.has-toc .article-header h1 {
+    max-width: none;
+  }
+
+  .article-layout {
+    display: block;
+  }
+
+  /* 移动端：目录在正文上方 */
+  .toc-col {
+    margin-bottom: var(--space-5);
+  }
+
+  .article-main {
+    min-width: 0;
+  }
+
+  .article-main :global(.prose) {
+    margin-inline: 0;
     max-width: var(--content-width);
+  }
+
+  .article-main :global(.post-nav),
+  .article-main :global(.related),
+  .article-main :global(.comments),
+  .article :global(.post-meta),
+  .article :global(.share-bar) {
+    max-width: var(--content-width);
+  }
+
+  /* 桌面：目录固定在左侧 */
+  @media (min-width: 900px) {
+    .article.has-toc .article-layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: var(--space-8);
+      align-items: start;
+    }
+
+    .toc-col {
+      margin-bottom: 0;
+      /* sticky 在 aside 上，目录组件内部也 sticky 双保险 */
+      position: sticky;
+      top: calc(var(--header-h) + 1rem);
+      align-self: start;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .article.has-toc .article-layout {
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+  }
+
+  @media print {
+    .toc-col {
+      display: none !important;
+    }
+
+    .article.has-toc .article-layout {
+      display: block;
+    }
   }
 </style>
