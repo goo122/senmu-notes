@@ -47,7 +47,7 @@ npm run write
 
 浏览器打开：
 
-- 发文后台：http://127.0.0.1:4321/admin/
+- 发文后台：http://127.0.0.1:4321/admin （不要末尾斜杠）
 - 操作说明：http://127.0.0.1:4321/write
 
 在后台点 **New post** 写文章，点 **Publish** 即保存到 `src/content/posts/`。

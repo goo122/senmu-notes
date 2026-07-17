@@ -27,7 +27,7 @@ import { site } from '../lib/site';
         <li>
           浏览器打开后台：
           <p>
-            <a class="btn btn-primary" href="/admin/">进入写文章后台 →</a>
+            <a class="btn btn-primary" href="/admin">进入写文章后台 →</a>
           </p>
         </li>
         <li>
@@ -37,7 +37,7 @@ import { site } from '../lib/site';
         <li>回到站点「文章」列表刷新即可看到（草稿仅在开发环境可见）</li>
       </ol>
       <p class="note">
-        后台地址一般是 <code>http://127.0.0.1:4321/admin/</code>（以终端显示的端口为准）。
+        后台地址是 <code>http://127.0.0.1:4321/admin</code>（注意：不要加末尾 <code>/</code>；端口以终端为准）。
         两个进程都要保持运行：博客 dev + CMS 本地后端。
       </p>
     </section>
@@ -109,7 +109,7 @@ import { site } from '../lib/site';
     </section>
 
     <p class="footer-links">
-      <a class="btn btn-primary" href="/admin/">打开发文后台</a>
+      <a class="btn btn-primary" href="/admin">打开发文后台</a>
       <a class="btn btn-ghost" href="/blog">返回文章列表</a>
     </p>
   </div>

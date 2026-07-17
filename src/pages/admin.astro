@@ -1,0 +1,88 @@
+---
+/**
+ * 发文后台（Decap CMS）
+ * 路由：/admin（适配 trailingSlash: never，不要用 /admin/）
+ */
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>写文章 · 森木笔记</title>
+    <!-- 明确配置路径，避免 /admin 下找不到 config.yml -->
+    <link href="/admin/config.yml" type="text/yaml" rel="cms-config-url" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family: system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background: #fffdf9;
+      }
+      .boot {
+        max-width: 28rem;
+        margin: 18vh auto;
+        padding: 1.5rem;
+        text-align: center;
+        color: #57534e;
+        line-height: 1.65;
+      }
+      .boot h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.2rem;
+        color: #1c1917;
+      }
+      .boot code {
+        display: inline-block;
+        margin-top: 0.35rem;
+        background: #fff7ed;
+        padding: 0.15em 0.45em;
+        border-radius: 6px;
+        font-size: 0.9em;
+      }
+      .boot a {
+        color: #ea580c;
+      }
+    </style>
+    <script is:inline src="https://unpkg.com/decap-cms@^3.3.3/dist/decap-cms.js"></script>
+  </head>
+  <body>
+    <div class="boot" id="boot">
+      <h1>正在加载编辑后台…</h1>
+      <p>
+        若一直空白，请在项目目录先运行：
+        <br />
+        <code>npm run write</code>
+      </p>
+      <p>
+        正确地址是 <code>/admin</code>（不要加末尾斜杠）。
+        <br />
+        <a href="/write">查看发文说明</a>
+      </p>
+    </div>
+    <script is:inline>
+      (function () {
+        function hide() {
+          var el = document.getElementById('boot');
+          if (el) el.style.display = 'none';
+        }
+        var obs = new MutationObserver(function () {
+          if (
+            document.getElementById('nc-root') ||
+            document.querySelector("[class*='App']") ||
+            document.querySelector("[class*='css-']")
+          ) {
+            hide();
+            obs.disconnect();
+          }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+        setTimeout(hide, 10000);
+      })();
+    </script>
+  </body>
+</html>
