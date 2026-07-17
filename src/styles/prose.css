@@ -46,7 +46,26 @@
   border-left: 3px solid var(--accent);
   background: var(--soft);
   border-radius: 0 var(--radius-card) var(--radius-card) 0;
-  color: #57534e;
+  color: var(--muted);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.25em;
+  font-size: 0.95rem;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.prose th {
+  background: var(--soft);
+  font-weight: 600;
 }
 
 .prose code {

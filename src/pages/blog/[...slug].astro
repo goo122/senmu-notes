@@ -4,8 +4,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostMeta from '../../components/PostMeta.astro';
 import PostNav from '../../components/PostNav.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
-import { getNeighborPosts, readingMinutesFor } from '../../lib/posts';
+import RelatedPosts from '../../components/RelatedPosts.astro';
+import ShareBar from '../../components/ShareBar.astro';
+import Comments from '../../components/Comments.astro';
+import CodeCopy from '../../components/CodeCopy.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
+import {
+  getNeighborPosts,
+  getRelatedPosts,
+  readingMinutesFor,
+} from '../../lib/posts';
 import { extractHeadings, formatReadingTime } from '../../lib/reading';
+import { site } from '../../lib/site';
 import '../../styles/prose.css';
 
 export async function getStaticPaths() {
@@ -25,15 +35,38 @@ interface Props {
 const { post } = Astro.props;
 const { Content, headings: renderedHeadings } = await post.render();
 const { prev, next } = await getNeighborPosts(post.slug);
-const readingTime = formatReadingTime(readingMinutesFor(post));
+const related = await getRelatedPosts(post, 3);
+const minutes = readingMinutesFor(post);
+const readingTime = formatReadingTime(minutes);
 
-// Prefer Astro-rendered heading ids; fallback to markdown parse
 const headings =
   renderedHeadings && renderedHeadings.length > 0
     ? renderedHeadings
         .filter((h) => h.depth >= 2 && h.depth <= 3)
         .map((h) => ({ depth: h.depth, text: h.text, id: h.slug }))
     : extractHeadings(post.body);
+
+const base = Astro.site ?? new URL(site.url);
+const articleUrl = new URL(`/blog/${post.slug}`, base).toString();
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: (post.data.updatedDate ?? post.data.pubDate).toISOString(),
+  author: {
+    '@type': 'Person',
+    name: site.author,
+  },
+  mainEntityOfPage: articleUrl,
+  inLanguage: site.lang,
+  keywords: post.data.tags.join(', '),
+  articleSection: post.data.category,
+  wordCount: post.body.length,
+  timeRequired: `PT${minutes}M`,
+};
 ---
 
 <BaseLayout
@@ -41,7 +74,10 @@ const headings =
   description={post.data.description}
   image={post.data.heroImage}
   type="article"
+  jsonLd={jsonLd}
+  showProgress
 >
+  <ReadingProgress slot="progress" />
   <article class="container article">
     <header class="article-header">
       <h1>{post.data.title}</h1>
@@ -52,12 +88,16 @@ const headings =
         updatedDate={post.data.updatedDate}
         readingTime={readingTime}
       />
+      <ShareBar title={post.data.title} />
     </header>
     <TableOfContents headings={headings} />
     <div class="prose">
       <Content />
     </div>
+    <CodeCopy />
     <PostNav prev={prev} next={next} />
+    <RelatedPosts posts={related} />
+    <Comments />
   </article>
 </BaseLayout>
 
@@ -71,7 +111,10 @@ const headings =
 
   .article :global(.post-meta),
   .article :global(.post-nav),
-  .article :global(.toc) {
+  .article :global(.toc),
+  .article :global(.share-bar),
+  .article :global(.related),
+  .article :global(.comments) {
     max-width: var(--content-width);
   }
 </style>

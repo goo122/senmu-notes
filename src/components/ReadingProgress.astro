@@ -1,0 +1,55 @@
+---
+---
+
+<div class="reading-progress" id="reading-progress" aria-hidden="true">
+  <div class="reading-progress-bar" id="reading-progress-bar"></div>
+</div>
+
+<script>
+  const bar = document.getElementById('reading-progress-bar');
+  const article = document.querySelector('article.article') as HTMLElement | null;
+
+  function update() {
+    if (!bar) return;
+    const doc = document.documentElement;
+    let progress = 0;
+
+    if (article) {
+      const rect = article.getBoundingClientRect();
+      const total = article.offsetHeight - window.innerHeight;
+      const scrolled = -rect.top;
+      progress = total > 0 ? Math.min(1, Math.max(0, scrolled / total)) : 0;
+    } else {
+      const total = doc.scrollHeight - window.innerHeight;
+      progress = total > 0 ? window.scrollY / total : 0;
+    }
+
+    bar.style.transform = `scaleX(${progress})`;
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+</script>
+
+<style>
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 40;
+    pointer-events: none;
+    background: transparent;
+  }
+
+  .reading-progress-bar {
+    height: 100%;
+    width: 100%;
+    transform-origin: left center;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, var(--accent), #fdba74);
+    transition: transform 0.08s linear;
+  }
+</style>

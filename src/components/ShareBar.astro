@@ -1,0 +1,85 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="share-bar">
+  <button type="button" class="share-btn" id="copy-link" data-title={title}>
+    复制链接
+  </button>
+  <a
+    class="share-btn"
+    id="share-x"
+    href="#"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    分享到 X
+  </a>
+</div>
+
+<script>
+  const btn = document.getElementById('copy-link');
+  const xLink = document.getElementById('share-x') as HTMLAnchorElement | null;
+  const url = window.location.href;
+  const title = btn?.dataset.title ?? document.title;
+
+  if (xLink) {
+    xLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+  }
+
+  btn?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      const original = btn.textContent;
+      btn.textContent = '已复制 ✓';
+      btn.classList.add('ok');
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove('ok');
+      }, 1600);
+    } catch {
+      btn.textContent = '复制失败';
+    }
+  });
+</script>
+
+<style>
+  .share-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: var(--content-width);
+    margin: 0 0 var(--space-6);
+  }
+
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .share-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .share-btn.ok {
+    color: #16a34a;
+    border-color: #86efac;
+  }
+</style>

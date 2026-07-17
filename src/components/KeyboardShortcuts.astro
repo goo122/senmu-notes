@@ -1,0 +1,24 @@
+---
+---
+
+<script>
+  document.addEventListener('keydown', (e) => {
+    const target = e.target as HTMLElement | null;
+    const tag = target?.tagName?.toLowerCase();
+    const typing =
+      tag === 'input' ||
+      tag === 'textarea' ||
+      tag === 'select' ||
+      target?.isContentEditable;
+
+    // / 跳转搜索；s 同理
+    if (!typing && (e.key === '/' || e.key === 's') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      if (location.pathname.replace(/\/$/, '') === '/search') {
+        document.getElementById('search-input')?.focus();
+      } else {
+        location.href = '/search';
+      }
+    }
+  });
+</script>

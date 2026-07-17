@@ -98,3 +98,31 @@ export async function getSearchIndex(): Promise<SearchEntry[]> {
       .slice(0, 4000),
   }));
 }
+
+/** Score related posts by shared tags + same category. */
+export async function getRelatedPosts(
+  post: Post,
+  limit = 3,
+): Promise<Post[]> {
+  const posts = await getPublishedPosts();
+  const tagSet = new Set(post.data.tags);
+
+  return posts
+    .filter((p) => p.slug !== post.slug)
+    .map((p) => {
+      let score = 0;
+      if (p.data.category === post.data.category) score += 2;
+      for (const tag of p.data.tags) {
+        if (tagSet.has(tag)) score += 3;
+      }
+      return { post: p, score };
+    })
+    .filter((x) => x.score > 0)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf(),
+    )
+    .slice(0, limit)
+    .map((x) => x.post);
+}

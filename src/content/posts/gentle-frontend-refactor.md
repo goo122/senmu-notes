@@ -21,6 +21,17 @@ featured: true
 
 组件不必追求极致抽象。如果一个文件读起来像一篇短文，结构往往就对了：输入清晰、副作用靠边、样式就近。
 
+```ts
+// 小而清晰的边界
+export function pickFeatured<T extends { featured?: boolean }>(
+  items: T[],
+  limit = 3,
+) {
+  const featured = items.filter((i) => i.featured);
+  return (featured.length ? featured : items).slice(0, limit);
+}
+```
+
 > 重构的成功标志，是下一次需求来时你不再害怕打开那个文件夹。
 
 ## 收尾

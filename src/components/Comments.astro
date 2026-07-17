@@ -1,0 +1,83 @@
+---
+import { site, isGiscusReady } from '../lib/site';
+
+const ready = isGiscusReady();
+const g = site.giscus;
+---
+
+<section class="comments" aria-labelledby="comments-title">
+  <h2 id="comments-title" class="section-title">评论</h2>
+  {
+    ready ? (
+      <div class="giscus-wrap">
+        <script
+          src="https://giscus.app/client.js"
+          data-repo={g.repo}
+          data-repo-id={g.repoId}
+          data-category={g.category}
+          data-category-id={g.categoryId}
+          data-mapping={g.mapping}
+          data-strict="0"
+          data-reactions-enabled={g.reactionsEnabled ? '1' : '0'}
+          data-emit-metadata="0"
+          data-input-position={g.inputPosition}
+          data-theme="preferred_color_scheme"
+          data-lang={g.lang}
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async
+        ></script>
+      </div>
+    ) : (
+      <div class="comments-placeholder">
+        <p>评论功能已预留（Giscus）。</p>
+        <p class="hint">
+          在 <a href="https://giscus.app/zh-CN" target="_blank" rel="noopener noreferrer">giscus.app</a>
+          配置仓库后，编辑 <code>src/lib/site.ts</code> 中的 <code>giscus</code>：
+          设置 <code>enabled: true</code> 并填入 repo / repoId / categoryId。
+        </p>
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .comments {
+    max-width: var(--content-width);
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .comments-placeholder {
+    padding: var(--space-5);
+    border-radius: var(--radius-card);
+    border: 1px dashed var(--border);
+    background: var(--soft);
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .comments-placeholder p {
+    margin: 0 0 0.6em;
+  }
+
+  .comments-placeholder p:last-child {
+    margin-bottom: 0;
+  }
+
+  .hint {
+    font-size: 0.92rem;
+  }
+
+  .comments-placeholder code {
+    font-size: 0.88em;
+    background: var(--surface);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+
+  .giscus-wrap {
+    min-height: 120px;
+  }
+</style>

@@ -1,0 +1,75 @@
+---
+---
+
+<script>
+  function enhance() {
+    document.querySelectorAll('.prose pre').forEach((pre) => {
+      if (pre.parentElement?.classList.contains('code-block')) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'code-block';
+      pre.parentNode?.insertBefore(wrap, pre);
+      wrap.appendChild(pre);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'code-copy';
+      btn.textContent = '复制';
+      btn.setAttribute('aria-label', '复制代码');
+      wrap.appendChild(btn);
+
+      btn.addEventListener('click', async () => {
+        const code = pre.querySelector('code')?.textContent ?? pre.textContent ?? '';
+        try {
+          await navigator.clipboard.writeText(code);
+          btn.textContent = '已复制';
+          setTimeout(() => {
+            btn.textContent = '复制';
+          }, 1400);
+        } catch {
+          btn.textContent = '失败';
+        }
+      });
+    });
+  }
+
+  enhance();
+  document.addEventListener('astro:page-load', enhance);
+</script>
+
+<style is:global>
+  .code-block {
+    position: relative;
+    margin: 0 0 1.25em;
+  }
+
+  .code-block pre {
+    margin: 0 !important;
+  }
+
+  .code-copy {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    z-index: 2;
+    padding: 0.25rem 0.55rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
+    color: #e7e5e4;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .code-block:hover .code-copy,
+  .code-copy:focus {
+    opacity: 1;
+  }
+
+  .code-copy:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+</style>

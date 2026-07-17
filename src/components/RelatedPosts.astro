@@ -1,0 +1,43 @@
+---
+import type { Post } from '../lib/posts';
+import PostCard from './PostCard.astro';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+{
+  posts.length > 0 && (
+    <section class="related" aria-labelledby="related-title">
+      <h2 id="related-title" class="section-title">
+        相关文章
+      </h2>
+      <div class="related-list">
+        {posts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .related {
+    max-width: var(--content-width);
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .related .section-title {
+    margin-bottom: var(--space-4);
+  }
+
+  .related-list {
+    display: grid;
+    gap: var(--space-4);
+  }
+</style>

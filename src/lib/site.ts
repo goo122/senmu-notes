@@ -9,6 +9,21 @@ export const site = {
     github: 'https://github.com/',
     email: 'hello@example.com',
   },
+  /**
+   * Giscus 评论：在 https://giscus.app/zh-CN 配置后填入。
+   * 全部字段填好后评论区才会显示。
+   */
+  giscus: {
+    enabled: false,
+    repo: 'OWNER/REPO',
+    repoId: '',
+    category: 'Announcements',
+    categoryId: '',
+    mapping: 'pathname' as const,
+    reactionsEnabled: true,
+    inputPosition: 'top' as const,
+    lang: 'zh-CN',
+  },
 } as const;
 
 export const nav = [
@@ -28,3 +43,10 @@ export const categoryLabels: Record<Category, string> = {
   notes: '随想',
   other: '其他',
 };
+
+export function isGiscusReady(): boolean {
+  const g = site.giscus;
+  return Boolean(
+    g.enabled && g.repo && g.repoId && g.categoryId && !g.repo.includes('OWNER'),
+  );
+}
