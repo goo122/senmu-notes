@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>写文章 · 森木笔记</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family: system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background: #fffdf9;
+      }
+      #boot {
+        max-width: 36rem;
+        margin: 10vh auto;
+        padding: 1.5rem;
+        color: #44403c;
+        line-height: 1.7;
+      }
+      #boot h1 {
+        margin: 0 0 0.75rem;
+        font-size: 1.4rem;
+        color: #1c1917;
+      }
+      #boot.hidden {
+        display: none !important;
+      }
+      #boot.error {
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+        border-radius: 12px;
+      }
+      code {
+        background: #fff7ed;
+        padding: 0.1em 0.4em;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+      pre {
+        background: #1c1917;
+        color: #fafaf9;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        overflow: auto;
+        font-size: 0.85rem;
+        white-space: pre-wrap;
+      }
+      a {
+        color: #ea580c;
+      }
+      .hint {
+        margin-top: 1rem;
+        padding: 0.85rem 1rem;
+        background: #fff7ed;
+        border-radius: 10px;
+        border: 1px solid #ffedd5;
+        font-size: 0.92rem;
+      }
+    </style>
+    <script>
+      // 必须在 CMS 脚本之前
+      window.CMS_MANUAL_INIT = true;
+    </script>
+  </head>
+  <body>
+    <div id="boot">
+      <h1>正在加载发文后台…</h1>
+      <p id="status">初始化…</p>
+      <div class="hint">
+        <strong>使用前请确认：</strong>
+        <ol>
+          <li>终端已运行 <code>npm run write</code></li>
+          <li>日志里有 <code>listening on port 8081</code></li>
+          <li>本页地址形如 <code>http://127.0.0.1:端口/editor.html</code></li>
+        </ol>
+      </div>
+      <p><a href="/write">发文说明</a> · <a href="/">回首页</a></p>
+    </div>
+
+    <script>
+      (function () {
+        var boot = document.getElementById('boot');
+        var statusEl = document.getElementById('status');
+
+        function status(msg) {
+          if (statusEl) statusEl.textContent = msg;
+          console.log('[cms]', msg);
+        }
+
+        function fail(title, detail, extra) {
+          console.error('[cms]', title, detail, extra);
+          boot.className = 'error';
+          boot.innerHTML =
+            '<h1>' +
+            title +
+            '</h1><p>' +
+            detail +
+            '</p>' +
+            (extra ? '<pre>' + String(extra).replace(/</g, '&lt;') + '</pre>' : '') +
+            '<p><button type="button" onclick="location.reload()">刷新重试</button> · <a href="/write">说明</a></p>';
+        }
+
+        function loadScript(src) {
+          return new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = src;
+            s.onload = function () {
+              resolve(src);
+            };
+            s.onerror = function () {
+              reject(new Error('脚本加载失败: ' + src));
+            };
+            document.body.appendChild(s);
+          });
+        }
+
+        var config = {
+          local_backend: true,
+          backend: {
+            name: 'git-gateway',
+            branch: 'feature/personal-blog',
+          },
+          media_folder: 'public/uploads',
+          public_folder: '/uploads',
+          collections: [
+            {
+              name: 'posts',
+              label: '文章',
+              label_singular: '文章',
+              folder: 'src/content/posts',
+              create: true,
+              delete: true,
+              slug: '{{slug}}',
+              extension: 'md',
+              format: 'frontmatter',
+              fields: [
+                { label: '标题', name: 'title', widget: 'string' },
+                { label: '摘要', name: 'description', widget: 'text' },
+                {
+                  label: '发布日期',
+                  name: 'pubDate',
+                  widget: 'datetime',
+                  date_format: 'YYYY-MM-DD',
+                  time_format: false,
+                  format: 'YYYY-MM-DD',
+                },
+                {
+                  label: '更新日期',
+                  name: 'updatedDate',
+                  widget: 'datetime',
+                  date_format: 'YYYY-MM-DD',
+                  time_format: false,
+                  format: 'YYYY-MM-DD',
+                  required: false,
+                },
+                {
+                  label: '分类',
+                  name: 'category',
+                  widget: 'select',
+                  options: [
+                    { label: '技术', value: 'tech' },
+                    { label: '生活', value: 'life' },
+                    { label: '随想', value: 'notes' },
+                    { label: '其他', value: 'other' },
+                  ],
+                  default: 'notes',
+                },
+                { label: '标签', name: 'tags', widget: 'list', required: false },
+                {
+                  label: '首页精选',
+                  name: 'featured',
+                  widget: 'boolean',
+                  default: false,
+                  required: false,
+                },
+                {
+                  label: '草稿',
+                  name: 'draft',
+                  widget: 'boolean',
+                  default: false,
+                  required: false,
+                },
+                {
+                  label: '封面图',
+                  name: 'heroImage',
+                  widget: 'image',
+                  required: false,
+                },
+                { label: '正文', name: 'body', widget: 'markdown' },
+              ],
+            },
+          ],
+        };
+
+        async function start() {
+          status('1/2 加载 CMS 脚本…');
+          var sources = [
+            // 优先本地文件（不依赖外网 CDN）
+            '/vendor/decap-cms.js',
+            'https://cdn.jsdelivr.net/npm/decap-cms@3.1.2/dist/decap-cms.js',
+            'https://unpkg.com/decap-cms@3.1.2/dist/decap-cms.js',
+          ];
+          var loadedFrom = null;
+          var lastErr = null;
+          for (var i = 0; i < sources.length; i++) {
+            try {
+              loadedFrom = await loadScript(sources[i]);
+              break;
+            } catch (e) {
+              lastErr = e;
+            }
+          }
+
+          if (!loadedFrom) {
+            fail(
+              '无法下载 CMS 脚本',
+              'CDN 访问失败。请检查网络，或打开 F12 → Network 查看哪些请求失败。',
+              lastErr && lastErr.message,
+            );
+            return;
+          }
+
+          status('2/2 已加载 ' + loadedFrom + '，正在启动编辑器…');
+
+          if (typeof CMS === 'undefined') {
+            fail('CMS 对象不存在', '脚本文件可能损坏或不完整。');
+            return;
+          }
+
+          try {
+            CMS.init({ config: config });
+          } catch (e) {
+            fail('CMS.init 失败', e.message || String(e), e.stack);
+            return;
+          }
+
+          var n = 0;
+          var timer = setInterval(function () {
+            n++;
+            var root =
+              document.getElementById('nc-root') ||
+              document.querySelector('[class*="nc-"]') ||
+              document.querySelector('div[class*="App"]');
+            if (root) {
+              clearInterval(timer);
+              boot.classList.add('hidden');
+              console.log('[cms] UI mounted');
+              return;
+            }
+            // body 下除了 boot 还有大量节点 → 认为已渲染
+            if (document.body.children.length > 2) {
+              clearInterval(timer);
+              boot.classList.add('hidden');
+              return;
+            }
+            if (n >= 60) {
+              clearInterval(timer);
+              fail(
+                '编辑器界面未出现',
+                '脚本已执行但 UI 没出来。请确认终端有 decap-server listening on 8081，并查看 Console 报错。',
+              );
+            }
+          }, 200);
+        }
+
+        // DOM 就绪后再跑
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function () {
+            start().catch(function (e) {
+              fail('启动异常', e.message || String(e), e.stack);
+            });
+          });
+        } else {
+          start().catch(function (e) {
+            fail('启动异常', e.message || String(e), e.stack);
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

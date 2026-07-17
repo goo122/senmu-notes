@@ -11,7 +11,8 @@
     "write": "concurrently -k -n cms,web -c magenta,cyan \"npm run cms\" \"npm run dev:clean\""
   },
   "dependencies": {
-    "astro": "^5.7.0"
+    "astro": "^5.7.0",
+    "decap-cms": "^3.1.2"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

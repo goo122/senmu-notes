@@ -25,6 +25,7 @@ function isActive(href: string, path: string) {
               href={item.href}
               class:list={['nav-link', { active: isActive(item.href, currentPath) }]}
               aria-current={isActive(item.href, currentPath) ? 'page' : undefined}
+              data-astro-reload={item.href === '/write' ? true : undefined}
             >
               {item.label}
             </a>
