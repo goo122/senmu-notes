@@ -104,7 +104,7 @@ const jsonLd = {
       {
         hasToc && (
           <aside class="toc-col" aria-label="文章目录">
-            <TableOfContents headings={headings} variant="sidebar" />
+            <TableOfContents headings={headings} />
           </aside>
         )
       }
@@ -169,27 +169,44 @@ const jsonLd = {
     max-width: var(--content-width);
   }
 
-  /* 桌面：目录固定在左侧 */
+  /*
+   * 桌面：左目录 + 右正文
+   * align-items: stretch 让左侧列与正文同高，
+   * 这样 sticky 目录在下滑读正文时会固定在视口左侧。
+   */
   @media (min-width: 900px) {
     .article.has-toc .article-layout {
       display: grid;
       grid-template-columns: 240px minmax(0, 1fr);
       gap: var(--space-8);
-      align-items: start;
+      align-items: stretch;
     }
 
     .toc-col {
       margin-bottom: 0;
-      /* sticky 在 aside 上，目录组件内部也 sticky 双保险 */
-      position: sticky;
-      top: calc(var(--header-h) + 1rem);
-      align-self: start;
+      min-height: 100%;
+    }
+
+    /* 收起目录后正文占满 */
+    .article.has-toc.toc-collapsed .article-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .article.has-toc.toc-collapsed .toc-col {
+      display: none;
     }
   }
 
   @media (min-width: 1100px) {
-    .article.has-toc .article-layout {
+    .article.has-toc:not(.toc-collapsed) .article-layout {
       grid-template-columns: 260px minmax(0, 1fr);
+    }
+  }
+
+  /* 移动端收起：隐藏面板，保留悬浮按钮 */
+  @media (max-width: 899px) {
+    .article.has-toc.toc-collapsed .toc-col :global([data-toc-panel]) {
+      display: none;
     }
   }
 

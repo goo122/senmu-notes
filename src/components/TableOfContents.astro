@@ -3,91 +3,242 @@ import type { Heading } from '../lib/reading';
 
 interface Props {
   headings: Heading[];
-  /** sidebar：左侧粘性；inline：正文上方（移动端） */
-  variant?: 'sidebar' | 'inline';
 }
 
-const { headings, variant = 'sidebar' } = Astro.props;
+const { headings } = Astro.props;
 const show = headings.length >= 2;
 ---
 
 {
   show && (
-    <nav class:list={['toc', `toc-${variant}`]} aria-label="文章目录">
-      <p class="toc-title">目录</p>
-      <ol class="toc-list">
-        {headings.map((h) => (
-          <li class:list={['toc-item', `depth-${h.depth}`]}>
-            <a href={`#${h.id}`}>{h.text}</a>
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <>
+      <div class="toc-panel" id="toc-panel" data-toc-panel>
+        <div class="toc-head">
+          <p class="toc-title">目录</p>
+          <button
+            type="button"
+            class="toc-hide-btn"
+            data-toc-hide
+            aria-controls="toc-panel"
+            title="隐藏目录"
+          >
+            隐藏
+          </button>
+        </div>
+        <nav class="toc" aria-label="文章目录">
+          <ol class="toc-list">
+            {headings.map((h) => (
+              <li class:list={['toc-item', `depth-${h.depth}`]}>
+                <a href={`#${h.id}`}>{h.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </div>
+
+      <button
+        type="button"
+        class="toc-show-btn"
+        data-toc-show
+        aria-controls="toc-panel"
+        title="显示目录"
+        hidden
+      >
+        目录
+      </button>
+    </>
   )
 }
 
-<script>
-  function initTocSpy() {
-    const links = Array.from(
-      document.querySelectorAll<HTMLAnchorElement>('.toc a[href^="#"]'),
-    );
-    if (links.length === 0) return;
+<script is:inline>
+  (function () {
+    var STORAGE_KEY = 'senmu-toc-hidden';
 
-    const map = new Map<string, HTMLAnchorElement>();
-    links.forEach((a) => {
-      const id = decodeURIComponent(a.getAttribute('href')?.slice(1) || '');
-      if (id) map.set(id, a);
-    });
+    function getArticle() {
+      return document.querySelector('article.article.has-toc');
+    }
 
-    const headings = Array.from(map.keys())
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => !!el);
+    function applyHidden(hidden) {
+      var article = getArticle();
+      var panel = document.querySelector('[data-toc-panel]');
+      var showBtn = document.querySelector('[data-toc-show]');
+      if (!article || !panel) return;
 
-    if (headings.length === 0) return;
+      article.classList.toggle('toc-collapsed', hidden);
+      panel.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+      if (showBtn) {
+        if (hidden) showBtn.removeAttribute('hidden');
+        else showBtn.setAttribute('hidden', '');
+      }
+    }
 
-    const setActive = (id: string) => {
-      links.forEach((a) => a.classList.remove('is-active'));
-      map.get(id)?.classList.add('is-active');
-    };
+    function initToc() {
+      var article = getArticle();
+      if (!article) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]?.target?.id) {
-          setActive(visible[0].target.id);
-        }
-      },
-      {
-        rootMargin: '-20% 0px -65% 0px',
-        threshold: [0, 0.25, 0.5, 1],
-      },
-    );
+      var hideBtn = document.querySelector('[data-toc-hide]');
+      var showBtn = document.querySelector('[data-toc-show]');
 
-    headings.forEach((h) => observer.observe(h));
+      var stored = false;
+      try {
+        stored = localStorage.getItem(STORAGE_KEY) === '1';
+      } catch (e) {}
+      applyHidden(stored);
 
-    // 点击后立即高亮
-    links.forEach((a) => {
-      a.addEventListener('click', () => {
-        const id = decodeURIComponent(a.getAttribute('href')?.slice(1) || '');
-        if (id) setActive(id);
+      if (hideBtn && !hideBtn.dataset.bound) {
+        hideBtn.dataset.bound = '1';
+        hideBtn.addEventListener('click', function () {
+          try {
+            localStorage.setItem(STORAGE_KEY, '1');
+          } catch (e) {}
+          applyHidden(true);
+        });
+      }
+
+      if (showBtn && !showBtn.dataset.bound) {
+        showBtn.dataset.bound = '1';
+        showBtn.addEventListener('click', function () {
+          try {
+            localStorage.setItem(STORAGE_KEY, '0');
+          } catch (e) {}
+          applyHidden(false);
+        });
+      }
+
+      // 滚动高亮当前章节
+      var links = Array.from(document.querySelectorAll('.toc a[href^="#"]'));
+      if (links.length === 0) return;
+
+      var map = {};
+      links.forEach(function (a) {
+        var id = decodeURIComponent((a.getAttribute('href') || '').slice(1));
+        if (id) map[id] = a;
       });
-    });
-  }
 
-  initTocSpy();
-  document.addEventListener('astro:page-load', initTocSpy);
+      var heads = Object.keys(map)
+        .map(function (id) {
+          return document.getElementById(id);
+        })
+        .filter(Boolean);
+
+      function setActive(id) {
+        links.forEach(function (a) {
+          a.classList.remove('is-active');
+        });
+        if (map[id]) map[id].classList.add('is-active');
+      }
+
+      if (window.__senmuTocObserver) {
+        window.__senmuTocObserver.disconnect();
+      }
+
+      window.__senmuTocObserver = new IntersectionObserver(
+        function (entries) {
+          var visible = entries
+            .filter(function (e) {
+              return e.isIntersecting;
+            })
+            .sort(function (a, b) {
+              return b.intersectionRatio - a.intersectionRatio;
+            });
+          if (visible[0] && visible[0].target && visible[0].target.id) {
+            setActive(visible[0].target.id);
+          }
+        },
+        { rootMargin: '-20% 0px -65% 0px', threshold: [0, 0.25, 0.5, 1] },
+      );
+
+      heads.forEach(function (h) {
+        window.__senmuTocObserver.observe(h);
+      });
+
+      links.forEach(function (a) {
+        a.addEventListener('click', function () {
+          var id = decodeURIComponent((a.getAttribute('href') || '').slice(1));
+          if (id) setActive(id);
+        });
+      });
+    }
+
+    // 事件委托：兼容 View Transitions 换页
+    if (!window.__senmuTocToggleBound) {
+      window.__senmuTocToggleBound = true;
+      document.addEventListener(
+        'click',
+        function (e) {
+          var t = e.target;
+          if (!t || !t.closest) return;
+          if (t.closest('[data-toc-hide]')) {
+            try {
+              localStorage.setItem(STORAGE_KEY, '1');
+            } catch (err) {}
+            applyHidden(true);
+          }
+          if (t.closest('[data-toc-show]')) {
+            try {
+              localStorage.setItem(STORAGE_KEY, '0');
+            } catch (err) {}
+            applyHidden(false);
+          }
+        },
+        true,
+      );
+    }
+
+    initToc();
+    document.addEventListener('astro:page-load', initToc);
+    document.addEventListener('astro:after-swap', initToc);
+  })();
 </script>
 
 <style>
+  .toc-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    padding: var(--space-4);
+    /* 页面滚动时，目录停在左侧不跟着走 */
+    position: sticky;
+    top: calc(var(--header-h) + 1rem);
+    max-height: calc(100vh - var(--header-h) - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .toc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: var(--space-3);
+  }
+
   .toc-title {
-    margin: 0 0 var(--space-3);
+    margin: 0;
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--muted);
+  }
+
+  .toc-hide-btn {
+    border: 1px solid var(--border);
+    background: var(--soft);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .toc-hide-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   .toc-list {
@@ -106,7 +257,10 @@ const show = headings.length >= 2;
     padding: 0.35rem 0.5rem;
     border-radius: 8px;
     border-left: 2px solid transparent;
-    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    transition:
+      color 0.15s ease,
+      background 0.15s ease,
+      border-color 0.15s ease;
   }
 
   .toc-item a:hover {
@@ -129,25 +283,62 @@ const show = headings.length >= 2;
     font-size: 0.85rem;
   }
 
-  /* 左侧侧栏：桌面粘性 */
-  .toc-sidebar {
-    position: sticky;
-    top: calc(var(--header-h) + 1rem);
-    max-height: calc(100vh - var(--header-h) - 2rem);
-    overflow-y: auto;
-    padding: var(--space-4);
-    background: var(--surface);
+  /* 隐藏后：左侧悬浮「目录」按钮 */
+  .toc-show-btn {
+    position: fixed;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 25;
+    writing-mode: vertical-rl;
+    letter-spacing: 0.12em;
+    padding: 0.85rem 0.45rem;
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
     border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-soft);
+    border-left: none;
+    background: var(--surface);
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-hover);
   }
 
-  /* 移动端内联目录 */
-  .toc-inline {
-    margin: 0 0 var(--space-5);
-    padding: var(--space-4);
+  .toc-show-btn:hover {
     background: var(--soft);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
+  }
+
+  .toc-show-btn[hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 899px) {
+    .toc-panel {
+      position: relative;
+      top: auto;
+      max-height: none;
+      margin-bottom: 0;
+    }
+
+    .toc-show-btn {
+      /* 手机上用底部小按钮，避免挡内容 */
+      top: auto;
+      bottom: 5.5rem;
+      left: 0.75rem;
+      transform: none;
+      writing-mode: horizontal-tb;
+      letter-spacing: 0;
+      padding: 0.55rem 0.85rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+    }
+  }
+
+  @media print {
+    .toc-panel,
+    .toc-show-btn {
+      display: none !important;
+    }
   }
 </style>
