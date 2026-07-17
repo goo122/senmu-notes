@@ -8,47 +8,28 @@
 
 `https://github.com/你的用户名`
 
-记下这个用户名（下面用 `YOUR_USER` 代替）。
+本仓库地址：
 
-## 二、在 GitHub 新建仓库
+**https://github.com/goo122/senmu-notes**
 
-1. 打开：https://github.com/new  
-2. Repository name：`senmu-notes`  
-3. 选 **Public**  
-4. **不要**勾选 “Add a README”（空仓库更方便直接推送）  
-5. 点 **Create repository**
+代码已推送到 `main` 分支。
 
-## 三、把本地代码推上去
-
-在 PowerShell 中执行（把 `YOUR_USER` 换成你的用户名）：
-
-```powershell
-cd D:\GrokTest\.worktrees\personal-blog
-
-git remote remove origin 2>$null
-git remote add origin https://github.com/YOUR_USER/senmu-notes.git
-git branch -M main
-git push -u origin main
-```
-
-推送时会弹出 GitHub 登录 / Personal Access Token。  
-若要求 Token：GitHub → Settings → Developer settings → Personal access tokens，勾选 `repo` 权限。
-
-## 四、用 Vercel 发布（免费）
+## 二、用 Vercel 发布（免费，约 2 分钟）
 
 1. 打开 https://vercel.com  
-2. 用 **GitHub** 账号登录并授权  
+2. 用 **GitHub** 账号登录（选 goo122），并授权访问仓库  
 3. **Add New… → Project**  
-4. 选中 `senmu-notes` → **Import**  
-5. 设置一般自动识别为 Astro：  
+4. 选中 **senmu-notes** → **Import**  
+5. 框架选 **Astro**（一般会自动识别）：  
    - Build Command: `npm run build`  
    - Output Directory: `dist`  
-6. 点 **Deploy**
+   - Install Command: `npm install`  
+6. 点 **Deploy**，等待绿色成功  
 
 完成后会得到类似：
 
 `https://senmu-notes.vercel.app`  
-或 `https://senmu-notes-xxx.vercel.app`
+或 `https://senmu-notes-xxxx.vercel.app`
 
 把这个链接发给别人即可访问。
 
