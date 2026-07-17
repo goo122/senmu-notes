@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../lib/site';
+---
+
+<BaseLayout title="网页发文" description={`如何在网页上发布文章 — ${site.name}`}>
+  <div class="container guide">
+    <header class="page-header">
+      <h1>在网页上发布文章</h1>
+      <p class="lead">
+        博客已接入 <strong>Decap CMS</strong> 后台：浏览器里写稿、存草稿、点发布，文件会自动写到
+        <code>src/content/posts/</code>。
+      </p>
+    </header>
+
+    <section class="card primary">
+      <h2>本机一键开始（推荐先这样）</h2>
+      <ol>
+        <li>
+          打开终端，进入项目目录：
+          <pre><code>cd D:\GrokTest\.worktrees\personal-blog</code></pre>
+        </li>
+        <li>
+          运行（会同时启动博客 + 发文服务）：
+          <pre><code>npm run write</code></pre>
+        </li>
+        <li>
+          浏览器打开后台：
+          <p>
+            <a class="btn btn-primary" href="/admin/">进入写文章后台 →</a>
+          </p>
+        </li>
+        <li>
+          点 <strong>新建文章</strong> → 填写标题/正文 →
+          <strong>Publish</strong>（发布）或先存草稿
+        </li>
+        <li>回到站点「文章」列表刷新即可看到（草稿仅在开发环境可见）</li>
+      </ol>
+      <p class="note">
+        后台地址一般是 <code>http://127.0.0.1:4321/admin/</code>（以终端显示的端口为准）。
+        两个进程都要保持运行：博客 dev + CMS 本地后端。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>后台里怎么操作</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>你想做的事</th>
+            <th>在后台怎么做</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>写新文章</td>
+            <td>New post / 新建 → 填字段 → Publish</td>
+          </tr>
+          <tr>
+            <td>改旧文章</td>
+            <td>在文章列表点开 → 修改 → Publish</td>
+          </tr>
+          <tr>
+            <td>先不公开</td>
+            <td>勾选「草稿（不公开）」再发布文件</td>
+          </tr>
+          <tr>
+            <td>上首页精选</td>
+            <td>勾选「首页精选」</td>
+          </tr>
+          <tr>
+            <td>删文章</td>
+            <td>进入文章 → Delete（会删掉对应 .md 文件）</td>
+          </tr>
+          <tr>
+            <td>加封面</td>
+            <td>封面图 → 上传到 uploads，或填图片 URL</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>部署到网上后，也能网页发文吗？</h2>
+      <p>可以，但需要接上 GitHub（或 Netlify Identity），让后台有权限把文章提交进仓库。</p>
+      <ol>
+        <li>把博客仓库推到 GitHub</li>
+        <li>编辑 <code>public/admin/config.yml</code>：关闭 <code>local_backend</code>，启用 <code>github</code> 后端并填仓库名</li>
+        <li>
+          配置登录方式（二选一）：
+          <ul>
+            <li><strong>Netlify CMS/Identity + Git Gateway</strong>（部署在 Netlify 时最省事）</li>
+            <li><strong>GitHub OAuth</strong>（自建回调，或用社区 OAuth 代理）</li>
+          </ul>
+        </li>
+        <li>部署站点后访问 <code>https://你的域名/admin/</code>，登录即可发文</li>
+      </ol>
+      <p class="note">
+        发文后 Git 仓库会多/改 Markdown 文件；若开启了自动部署，网站会重新构建并更新。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>和「手写 Markdown」的关系</h2>
+      <p>
+        网页后台保存的结果，就是 <code>src/content/posts/*.md</code> 文件，和你用编辑器手写是同一套。
+        可以网页发一篇、编辑器改一篇，互不冲突。
+      </p>
+    </section>
+
+    <p class="footer-links">
+      <a class="btn btn-primary" href="/admin/">打开发文后台</a>
+      <a class="btn btn-ghost" href="/blog">返回文章列表</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .guide {
+    max-width: 720px;
+  }
+
+  .page-header {
+    margin-bottom: var(--space-6);
+  }
+
+  .page-header h1 {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .card {
+    margin-bottom: var(--space-5);
+    padding: var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .card.primary {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+    background: var(--soft);
+  }
+
+  .card h2 {
+    margin: 0 0 var(--space-4);
+    font-size: 1.2rem;
+  }
+
+  .card p,
+  .card li {
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .card ol,
+  .card ul {
+    margin: 0 0 1rem;
+    padding-left: 1.25rem;
+  }
+
+  .card pre {
+    margin: 0.5rem 0 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    overflow-x: auto;
+    font-size: 0.9rem;
+  }
+
+  .card code {
+    font-size: 0.9em;
+    background: var(--bg);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+
+  .card pre code {
+    background: transparent;
+    padding: 0;
+  }
+
+  .note {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  th,
+  td {
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: var(--soft);
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin: var(--space-6) 0 0;
+  }
+</style>

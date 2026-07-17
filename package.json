@@ -3,11 +3,17 @@
   "type": "module",
   "version": "0.1.0",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --host 127.0.0.1 --port 4321",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "cms": "decap-server",
+    "write": "concurrently -k -n cms,web -c magenta,cyan \"npm run cms\" \"npm run dev\""
   },
   "dependencies": {
     "astro": "^5.7.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "decap-server": "^3.1.2"
   }
 }

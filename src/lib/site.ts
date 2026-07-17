@@ -48,6 +48,7 @@ export const friends = [
 export const nav = [
   { href: '/', label: '首页' },
   { href: '/blog', label: '文章' },
+  { href: '/write', label: '发文' },
   { href: '/archive', label: '归档' },
   { href: '/tags', label: '标签' },
   { href: '/friends', label: '友链' },

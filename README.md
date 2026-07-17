@@ -36,13 +36,23 @@ draft: false
 正文…
 ```
 
-### 方式 B：Decap CMS 后台
+### 方式 B：网页后台发文（推荐）
 
-1. 终端 A：`npx decap-server`
-2. 终端 B：`npm run dev`
-3. 打开：`http://127.0.0.1:4321/admin/`
+一条命令同时启动博客 + 发文后台：
 
-生产部署请配置 Git Gateway / GitHub backend，并在 `public/admin/config.yml` 关闭 `local_backend`。
+```bash
+npm install
+npm run write
+```
+
+浏览器打开：
+
+- 发文后台：http://127.0.0.1:4321/admin/
+- 操作说明：http://127.0.0.1:4321/write
+
+在后台点 **New post** 写文章，点 **Publish** 即保存到 `src/content/posts/`。
+
+部署到公网后的网页发文，需在 `public/admin/config.yml` 配置 GitHub / Netlify Identity（详见 `/write` 页面）。
 
 ## 个性化
 
