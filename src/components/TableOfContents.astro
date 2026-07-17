@@ -44,7 +44,7 @@ const show = headings.length >= 2;
         title="显示目录"
         hidden
       >
-        目录
+        显示目录
       </button>
     </>
   )
@@ -283,30 +283,30 @@ const show = headings.length >= 2;
     font-size: 0.85rem;
   }
 
-  /* 隐藏后：左侧悬浮「目录」按钮 */
+  /* 隐藏后：屏幕左侧悬浮「显示目录」——固定在视口上，不随滚动消失 */
   .toc-show-btn {
     position: fixed;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 25;
+    left: 0;
+    top: 42%;
+    z-index: 40;
     writing-mode: vertical-rl;
-    letter-spacing: 0.12em;
-    padding: 0.85rem 0.45rem;
-    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+    letter-spacing: 0.15em;
+    padding: 1rem 0.55rem;
+    border-radius: 0 12px 12px 0;
     border: 1px solid var(--border);
     border-left: none;
-    background: var(--surface);
-    color: var(--accent);
+    background: var(--accent);
+    color: #fff;
     font: inherit;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     box-shadow: var(--shadow-hover);
   }
 
   .toc-show-btn:hover {
-    background: var(--soft);
+    background: var(--accent-hover);
+    color: #fff;
   }
 
   .toc-show-btn[hidden] {
@@ -322,14 +322,12 @@ const show = headings.length >= 2;
     }
 
     .toc-show-btn {
-      /* 手机上用底部小按钮，避免挡内容 */
       top: auto;
       bottom: 5.5rem;
-      left: 0.75rem;
-      transform: none;
+      left: 0.85rem;
       writing-mode: horizontal-tb;
       letter-spacing: 0;
-      padding: 0.55rem 0.85rem;
+      padding: 0.65rem 1rem;
       border-radius: var(--radius-pill);
       border: 1px solid var(--border);
     }

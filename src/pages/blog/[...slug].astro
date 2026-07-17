@@ -187,13 +187,25 @@ const jsonLd = {
       min-height: 100%;
     }
 
-    /* 收起目录后正文占满 */
+    /* 收起后：正文占满；不要 display:none 整个 toc-col，否则「显示目录」按钮也会消失 */
     .article.has-toc.toc-collapsed .article-layout {
-      grid-template-columns: 1fr;
+      display: block;
     }
 
     .article.has-toc.toc-collapsed .toc-col {
-      display: none;
+      margin: 0;
+      width: 0;
+      height: 0;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .article.has-toc.toc-collapsed .toc-col :global([data-toc-panel]) {
+      display: none !important;
+    }
+
+    .article.has-toc.toc-collapsed .toc-col :global([data-toc-show]) {
+      pointer-events: auto;
     }
   }
 
@@ -203,11 +215,9 @@ const jsonLd = {
     }
   }
 
-  /* 移动端收起：隐藏面板，保留悬浮按钮 */
-  @media (max-width: 899px) {
-    .article.has-toc.toc-collapsed .toc-col :global([data-toc-panel]) {
-      display: none;
-    }
+  /* 任意宽度：只藏面板，保留悬浮「显示目录」 */
+  .article.has-toc.toc-collapsed .toc-col :global([data-toc-panel]) {
+    display: none !important;
   }
 
   @media print {
