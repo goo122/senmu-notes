@@ -100,15 +100,10 @@ const jsonLd = {
       <ShareBar title={post.data.title} />
     </header>
 
-    <div class="article-layout">
-      {
-        hasToc && (
-          <aside class="toc-col" aria-label="文章目录">
-            <TableOfContents headings={headings} />
-          </aside>
-        )
-      }
+    {/* 目录会由脚本挂到 body 固定层；这里保留挂载点 */}
+    {hasToc && <TableOfContents headings={headings} />}
 
+    <div class="article-layout">
       <div class="article-main">
         <div class="prose">
           <Content />
@@ -136,20 +131,10 @@ const jsonLd = {
     margin: 0 0 var(--space-4);
     font-size: clamp(1.75rem, 4vw, 2.25rem);
     line-height: 1.25;
-    max-width: var(--content-width);
-  }
-
-  .article.has-toc .article-header h1 {
-    max-width: none;
   }
 
   .article-layout {
     display: block;
-  }
-
-  /* 移动端：目录在正文上方 */
-  .toc-col {
-    margin-bottom: var(--space-5);
   }
 
   .article-main {
@@ -169,63 +154,8 @@ const jsonLd = {
     max-width: var(--content-width);
   }
 
-  /*
-   * 桌面：左目录 + 右正文
-   * align-items: stretch 让左侧列与正文同高，
-   * 这样 sticky 目录在下滑读正文时会固定在视口左侧。
-   */
-  @media (min-width: 900px) {
-    .article.has-toc .article-layout {
-      display: grid;
-      grid-template-columns: 240px minmax(0, 1fr);
-      gap: var(--space-8);
-      align-items: stretch;
-    }
-
-    .toc-col {
-      margin-bottom: 0;
-      min-height: 100%;
-    }
-
-    /* 收起后：正文占满；不要 display:none 整个 toc-col，否则「显示目录」按钮也会消失 */
-    .article.has-toc.toc-collapsed .article-layout {
-      display: block;
-    }
-
-    .article.has-toc.toc-collapsed .toc-col {
-      margin: 0;
-      width: 0;
-      height: 0;
-      overflow: visible;
-      pointer-events: none;
-    }
-
-    .article.has-toc.toc-collapsed .toc-col :global([data-toc-panel]) {
-      display: none !important;
-    }
-
-    .article.has-toc.toc-collapsed .toc-col :global([data-toc-show]) {
-      pointer-events: auto;
-    }
-  }
-
-  @media (min-width: 1100px) {
-    .article.has-toc:not(.toc-collapsed) .article-layout {
-      grid-template-columns: 260px minmax(0, 1fr);
-    }
-  }
-
-  /* 任意宽度：只藏面板，保留悬浮「显示目录」 */
-  .article.has-toc.toc-collapsed .toc-col :global([data-toc-panel]) {
-    display: none !important;
-  }
-
   @media print {
-    .toc-col {
-      display: none !important;
-    }
-
-    .article.has-toc .article-layout {
+    .article-layout {
       display: block;
     }
   }

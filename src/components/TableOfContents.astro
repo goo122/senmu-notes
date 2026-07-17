@@ -11,7 +11,7 @@ const show = headings.length >= 2;
 
 {
   show && (
-    <>
+    <div class="toc-root" data-toc-root>
       <div class="toc-panel" id="toc-panel" data-toc-panel>
         <div class="toc-head">
           <p class="toc-title">目录</p>
@@ -46,68 +46,64 @@ const show = headings.length >= 2;
       >
         显示目录
       </button>
-    </>
+    </div>
   )
 }
 
 <script is:inline>
   (function () {
     var STORAGE_KEY = 'senmu-toc-hidden';
+    var HOST_ID = 'senmu-toc-fixed-host';
 
     function getArticle() {
       return document.querySelector('article.article.has-toc');
+    }
+
+    /** 挂到 body，避免父级 transform / 滚动容器导致 fixed 失效 */
+    function ensureHost() {
+      var host = document.getElementById(HOST_ID);
+      if (!host) {
+        host = document.createElement('div');
+        host.id = HOST_ID;
+        host.setAttribute('data-toc-fixed-host', '');
+        document.body.appendChild(host);
+      }
+      return host;
+    }
+
+    function mountFixedUi() {
+      var root = document.querySelector('[data-toc-root]');
+      if (!root) return null;
+      var host = ensureHost();
+      // 换页后旧节点可能还在 host 里
+      host.innerHTML = '';
+      host.appendChild(root);
+      return root;
     }
 
     function applyHidden(hidden) {
       var article = getArticle();
       var panel = document.querySelector('[data-toc-panel]');
       var showBtn = document.querySelector('[data-toc-show]');
-      if (!article || !panel) return;
+      if (!article) return;
 
       article.classList.toggle('toc-collapsed', hidden);
-      panel.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+      document.documentElement.classList.toggle('toc-is-collapsed', hidden);
+      document.documentElement.classList.toggle('toc-is-open', !hidden && !!panel);
+
+      if (panel) {
+        panel.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+        panel.hidden = !!hidden;
+      }
       if (showBtn) {
         if (hidden) showBtn.removeAttribute('hidden');
         else showBtn.setAttribute('hidden', '');
       }
     }
 
-    function initToc() {
-      var article = getArticle();
-      if (!article) return;
-
-      var hideBtn = document.querySelector('[data-toc-hide]');
-      var showBtn = document.querySelector('[data-toc-show]');
-
-      var stored = false;
-      try {
-        stored = localStorage.getItem(STORAGE_KEY) === '1';
-      } catch (e) {}
-      applyHidden(stored);
-
-      if (hideBtn && !hideBtn.dataset.bound) {
-        hideBtn.dataset.bound = '1';
-        hideBtn.addEventListener('click', function () {
-          try {
-            localStorage.setItem(STORAGE_KEY, '1');
-          } catch (e) {}
-          applyHidden(true);
-        });
-      }
-
-      if (showBtn && !showBtn.dataset.bound) {
-        showBtn.dataset.bound = '1';
-        showBtn.addEventListener('click', function () {
-          try {
-            localStorage.setItem(STORAGE_KEY, '0');
-          } catch (e) {}
-          applyHidden(false);
-        });
-      }
-
-      // 滚动高亮当前章节
-      var links = Array.from(document.querySelectorAll('.toc a[href^="#"]'));
-      if (links.length === 0) return;
+    function initSpy() {
+      var links = Array.from(document.querySelectorAll('#senmu-toc-fixed-host .toc a[href^="#"], [data-toc-root] .toc a[href^="#"]'));
+      if (!links.length) return;
 
       var map = {};
       links.forEach(function (a) {
@@ -151,16 +147,27 @@ const show = headings.length >= 2;
       heads.forEach(function (h) {
         window.__senmuTocObserver.observe(h);
       });
-
-      links.forEach(function (a) {
-        a.addEventListener('click', function () {
-          var id = decodeURIComponent((a.getAttribute('href') || '').slice(1));
-          if (id) setActive(id);
-        });
-      });
     }
 
-    // 事件委托：兼容 View Transitions 换页
+    function initToc() {
+      // 无目录文章：清掉残留宿主
+      if (!getArticle()) {
+        var old = document.getElementById(HOST_ID);
+        if (old) old.innerHTML = '';
+        document.documentElement.classList.remove('toc-is-open', 'toc-is-collapsed');
+        return;
+      }
+
+      mountFixedUi();
+
+      var hidden = false;
+      try {
+        hidden = localStorage.getItem(STORAGE_KEY) === '1';
+      } catch (e) {}
+      applyHidden(hidden);
+      initSpy();
+    }
+
     if (!window.__senmuTocToggleBound) {
       window.__senmuTocToggleBound = true;
       document.addEventListener(
@@ -191,22 +198,47 @@ const show = headings.length >= 2;
   })();
 </script>
 
-<style>
-  .toc-panel {
+<style is:global>
+  /* 固定在视口左侧，不随文章滚动 */
+  #senmu-toc-fixed-host {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 30;
+    pointer-events: none;
+    width: 0;
+  }
+
+  #senmu-toc-fixed-host .toc-root {
+    pointer-events: none;
+  }
+
+  #senmu-toc-fixed-host .toc-panel,
+  #senmu-toc-fixed-host .toc-show-btn {
+    pointer-events: auto;
+  }
+
+  #senmu-toc-fixed-host .toc-panel {
+    position: fixed;
+    left: max(0.75rem, calc((100vw - 1100px) / 2));
+    top: calc(var(--header-h, 64px) + 1rem);
+    width: min(240px, calc(100vw - 2rem));
+    max-height: calc(100vh - var(--header-h, 64px) - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-soft);
     padding: var(--space-4);
-    /* 页面滚动时，目录停在左侧不跟着走 */
-    position: sticky;
-    top: calc(var(--header-h) + 1rem);
-    max-height: calc(100vh - var(--header-h) - 2rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
   }
 
-  .toc-head {
+  #senmu-toc-fixed-host .toc-panel[hidden] {
+    display: none !important;
+  }
+
+  #senmu-toc-fixed-host .toc-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -214,7 +246,7 @@ const show = headings.length >= 2;
     margin-bottom: var(--space-3);
   }
 
-  .toc-title {
+  #senmu-toc-fixed-host .toc-title {
     margin: 0;
     font-size: 0.8rem;
     font-weight: 700;
@@ -223,7 +255,7 @@ const show = headings.length >= 2;
     color: var(--muted);
   }
 
-  .toc-hide-btn {
+  #senmu-toc-fixed-host .toc-hide-btn {
     border: 1px solid var(--border);
     background: var(--soft);
     color: var(--muted);
@@ -231,17 +263,17 @@ const show = headings.length >= 2;
     font-size: 0.78rem;
     font-weight: 600;
     padding: 0.2rem 0.55rem;
-    border-radius: var(--radius-pill);
+    border-radius: 999px;
     cursor: pointer;
     white-space: nowrap;
   }
 
-  .toc-hide-btn:hover {
+  #senmu-toc-fixed-host .toc-hide-btn:hover {
     color: var(--accent);
     border-color: var(--accent);
   }
 
-  .toc-list {
+  #senmu-toc-fixed-host .toc-list {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -249,7 +281,7 @@ const show = headings.length >= 2;
     gap: 0.15rem;
   }
 
-  .toc-item a {
+  #senmu-toc-fixed-host .toc-item a {
     display: block;
     color: var(--muted);
     font-size: 0.9rem;
@@ -257,34 +289,35 @@ const show = headings.length >= 2;
     padding: 0.35rem 0.5rem;
     border-radius: 8px;
     border-left: 2px solid transparent;
+    text-decoration: none;
     transition:
       color 0.15s ease,
       background 0.15s ease,
       border-color 0.15s ease;
   }
 
-  .toc-item a:hover {
+  #senmu-toc-fixed-host .toc-item a:hover {
     color: var(--accent);
     background: var(--soft);
   }
 
-  .toc-item a:global(.is-active) {
+  #senmu-toc-fixed-host .toc-item a.is-active {
     color: var(--accent);
     font-weight: 600;
     border-left-color: var(--accent);
     background: var(--soft);
   }
 
-  .toc-item.depth-3 {
+  #senmu-toc-fixed-host .toc-item.depth-3 {
     padding-left: 0.65rem;
   }
 
-  .toc-item.depth-3 a {
+  #senmu-toc-fixed-host .toc-item.depth-3 a {
     font-size: 0.85rem;
   }
 
-  /* 隐藏后：屏幕左侧悬浮「显示目录」——固定在视口上，不随滚动消失 */
-  .toc-show-btn {
+  /* 隐藏后：固定在左边的「显示目录」——始终贴视口左侧 */
+  #senmu-toc-fixed-host .toc-show-btn {
     position: fixed;
     left: 0;
     top: 42%;
@@ -304,38 +337,60 @@ const show = headings.length >= 2;
     box-shadow: var(--shadow-hover);
   }
 
-  .toc-show-btn:hover {
+  #senmu-toc-fixed-host .toc-show-btn:hover {
     background: var(--accent-hover);
     color: #fff;
   }
 
-  .toc-show-btn[hidden] {
+  #senmu-toc-fixed-host .toc-show-btn[hidden] {
     display: none !important;
   }
 
-  @media (max-width: 899px) {
-    .toc-panel {
-      position: relative;
-      top: auto;
-      max-height: none;
-      margin-bottom: 0;
+  /* 正文给左侧固定目录留空，避免重叠（桌面） */
+  @media (min-width: 900px) {
+    html.toc-is-open article.article.has-toc:not(.toc-collapsed) .article-layout {
+      padding-left: 260px;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    #senmu-toc-fixed-host .toc-panel {
+      width: 250px;
     }
 
-    .toc-show-btn {
+    html.toc-is-open article.article.has-toc:not(.toc-collapsed) .article-layout {
+      padding-left: 280px;
+    }
+  }
+
+  @media (max-width: 899px) {
+    #senmu-toc-fixed-host .toc-panel {
+      left: 0.75rem;
+      right: 0.75rem;
+      width: auto;
+      top: calc(var(--header-h, 64px) + 0.5rem);
+      max-height: min(42vh, 320px);
+    }
+
+    #senmu-toc-fixed-host .toc-show-btn {
       top: auto;
       bottom: 5.5rem;
       left: 0.85rem;
       writing-mode: horizontal-tb;
       letter-spacing: 0;
       padding: 0.65rem 1rem;
-      border-radius: var(--radius-pill);
+      border-radius: 999px;
       border: 1px solid var(--border);
+    }
+
+    html.toc-is-open article.article.has-toc:not(.toc-collapsed) .article-layout {
+      padding-left: 0;
+      padding-top: 0;
     }
   }
 
   @media print {
-    .toc-panel,
-    .toc-show-btn {
+    #senmu-toc-fixed-host {
       display: none !important;
     }
   }
